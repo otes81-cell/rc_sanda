@@ -1,0 +1,315 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020"><title>RC Papi Otes</title>
+<style>
+:root{--bg:#0b1020;--c:#151c36;--t:#eef2ff;--m:#8fa0d0;--a:#22d3ee;--y:#facc15;--g:#4ade80;--r:#f87171;--b:#2a3563}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px system-ui,sans-serif;padding:0 0 78px}
+header{padding:12px 16px;background:linear-gradient(90deg,#0e7490,#6d28d9);font-weight:800;font-size:18px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:8px}#lo{width:auto;margin:0;padding:6px 10px;font-size:12px;background:#0007;color:#fff}
+header small{display:block;font-weight:400;font-size:12px;opacity:.9}
+main{padding:12px;max-width:600px;margin:auto}.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
+h3{margin:0 0 8px;font-size:15px;color:var(--a)}label{font-size:12px;color:var(--m);display:block;margin:8px 0 3px}
+input,select,button{width:100%;padding:12px;border-radius:10px;border:1px solid var(--b);background:#0e1430;color:var(--t);font-size:16px}
+button{background:var(--a);color:#032;font-weight:700;border:0;margin-top:10px}button.s{background:var(--b);color:var(--t);width:auto;padding:6px 10px;margin:2px 0;font-size:13px}
+.row{display:flex;gap:8px}.row>*{flex:1}nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0e1430;border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom)}
+nav button{background:none;color:var(--m);border-radius:0;margin:0;padding:10px 0;font-size:11px;line-height:1.3}nav button.on{color:var(--a);border-top:2px solid var(--a)}
+.tag{display:inline-block;background:var(--b);border-radius:8px;padding:2px 8px;font-size:12px;margin:2px 2px 0 0}
+.big{font-size:24px;font-weight:800}.ok{color:var(--g)}.bad{color:var(--r)}.y{color:var(--y)}
+.it{border-bottom:1px solid var(--b);padding:8px 0;display:flex;justify-content:space-between;gap:8px}.it:last-child{border:0}
+.gift{background:#052e16;border:1px solid var(--g);border-radius:10px;padding:10px;margin-top:10px;font-weight:700}
+.warn{background:#450a0a;border:1px solid var(--r);border-radius:10px;padding:10px;margin-bottom:10px;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hide{display:none!important}details{margin:6px 0}summary{font-weight:700;padding:6px 0}
+li{margin:3px 0}ul{padding-left:18px;margin:4px 0;color:#cbd5f5}.chk{display:flex;gap:10px;align-items:center;padding:8px 0}.chk input{width:22px;height:22px}
+.sg{display:flex;gap:6px}.sg button{margin:0;background:var(--b);color:var(--t)}.sg button.on{background:var(--a);color:#032}
+.tb{width:100%;border-collapse:collapse;font-size:13px}.tb td,.tb th{padding:6px 4px;border-bottom:1px solid var(--b);text-align:right}.tb td:first-child,.tb th:first-child{text-align:left}
+.ov{position:fixed;inset:0;background:#000b;z-index:20;display:flex;align-items:center;padding:14px;overflow:auto}
+.sub{font-size:12px;color:var(--m)}
+</style></head><body>
+<header><div>🎮 RC PAPI OTES<small id="rl"></small></div><button id="lo" onclick="logout()">Keluar</button></header>
+<main>
+<section id="p1">
+ <div id="la"></div>
+ <div class="card"><h3>Mulai Sesi Baru</h3>
+  <label>Game</label><select id="g" onchange="fill()"></select>
+  <label>Paket</label><select id="pk" onchange="sync()"></select>
+  <label>Nama Anak (opsional)</label><input id="nm" placeholder="Nama">
+  <label>Pembayaran di depan</label><select id="sp" onchange="sync()"><option value="tunai">💵 Sudah bayar – Tunai</option><option value="qris">📱 Sudah bayar – QRIS</option><option value="belum">⏳ Belum bayar (tagih saat selesai)</option></select>
+  <div id="sc"><label>Uang diterima (opsional, hitung kembalian)</label><input id="sca" type="number" inputmode="numeric" oninput="sync()"><div id="skb" style="margin-top:6px"></div></div>
+  <div id="av" style="font-size:13px;margin-top:10px"></div><div id="nt" class="y" style="font-size:12px;margin-top:8px"></div>
+  <div class="big y" id="tt" style="margin-top:8px"></div>
+  <button onclick="save()">▶ Mulai Timer</button>
+  <div class="sub" style="margin-top:6px">Hasil &amp; hadiah diisi saat tombol <b>Selesai</b> ditekan.</div></div>
+ <div class="card"><h3>⏱ Sesi Berjalan</h3><div id="ss"></div></div>
+</section>
+<section id="p2" class="hide">
+ <div class="card"><h3>➕ Catat Pengeluaran</h3>
+  <label>Tanggal</label><input type="date" id="xd" onchange="exr()">
+  <label>Kategori</label><select id="xc"></select>
+  <label>Keterangan</label><input id="xn" placeholder="mis. Beli permen 2 bungkus">
+  <div class="row"><div><label>Jumlah (Rp)</label><input id="xa" type="number" inputmode="numeric"></div><div><label>Dibayar dari</label><select id="xm"><option value="tunai">💵 Kas tunai</option><option value="non">🏦 Non-tunai</option></select></div></div>
+  <button onclick="xsave()">Simpan Pengeluaran</button>
+  <div class="row" style="margin-top:4px"><button class="s" style="background:#0e7490;color:#fff" onclick="xq('sewa')">+ Sewa tempat harian</button><button class="s" style="background:#0e7490;color:#fff" onclick="xq('gaji')">+ Gaji harian</button></div></div>
+ <div class="card"><h3>Pengeluaran Tanggal Ini</h3><div id="xl"></div></div>
+</section>
+<section id="p3" class="hide">
+ <div class="card"><div class="sg" id="sgm"><button id="m_h" class="on" onclick="setm('h')">Harian</button><button id="m_w" onclick="setm('w')">Mingguan</button><button id="m_m" onclick="setm('m')">Bulanan</button></div>
+  <label id="rdl">Tanggal</label><input type="date" id="rd" onchange="rep()"></div>
+ <div class="card" id="sm"></div>
+ <div class="card hide" id="pd"></div>
+ <div class="card"><h3>Per Game</h3><div id="pg"></div></div>
+ <div class="card"><h3>👥 Per Pengguna</h3><div id="pu"></div></div>
+ <div class="card"><h3>Pengeluaran per Kategori</h3><div id="pc"></div></div>
+ <div class="card"><h3>🎁 Hadiah Keluar</h3><div id="hd"></div></div>
+ <div class="card" id="rhc"><h3>Riwayat Transaksi</h3><div id="ls"></div></div>
+ <div class="card"><button onclick="csv()">⬇️ Ekspor Laporan (CSV)</button></div>
+</section>
+<section id="p4" class="hide">
+ <div class="card"><h3>📦 Stok Hadiah</h3><div id="stv"></div><div class="sub">Perubahan stok hanya lewat menu Admin. Stok berkurang otomatis saat sesi diselesaikan.</div></div>
+ <div class="card"><h3>💵 Kas Tutup (otomatis)</h3><div id="ks"></div>
+  <label>Uang fisik di laci sekarang</label><input id="uf" type="number" inputmode="numeric" oninput="kas()"><div id="kd" style="margin-top:8px"></div></div>
+</section>
+<section id="p5" class="hide">
+ <div class="card"><h3>🧮 Kalkulator Kembalian</h3><div class="row"><div><label>Total bayar (Rp)</label><input id="k1" type="number" inputmode="numeric" oninput="kalc()"></div><div><label>Uang diterima (Rp)</label><input id="k2" type="number" inputmode="numeric" oninput="kalc()"></div></div><div id="k3" class="big" style="margin-top:8px"></div>
+  <div class="row"><button class="s" onclick="$('k2').value=10000;kalc()">10rb</button><button class="s" onclick="$('k2').value=20000;kalc()">20rb</button><button class="s" onclick="$('k2').value=50000;kalc()">50rb</button><button class="s" onclick="$('k2').value=100000;kalc()">100rb</button></div></div>
+ <div class="card"><h3>🔔 Tes Alarm &amp; Getar</h3><div class="sub">Tekan, kunci layar, lalu tunggu 10 detik. Pastikan bunyi/getar dan notifikasi muncul.</div><button onclick="tesal()">Tes alarm 10 detik</button></div>
+ <div class="card"><h3>🛠 Perawatan Alat</h3><div class="sub" id="u_air"></div><div class="row"><button onclick="D.air=today();sv();utr();la()">💧 Air kolam sudah diganti</button><button onclick="kreset();utr()">🥫 Susun ulang 6 kaleng</button></div></div>
+ <div class="card hide" id="u_bk"><h3>💾 Cadangan &amp; Ekspor (Admin)</h3><div class="row"><button onclick="bk()">Backup JSON</button><button onclick="csv('2000-01-01','2999-12-31')">Ekspor semua (CSV)</button></div><label>Pulihkan dari backup (.json) — khusus Admin</label><input type="file" accept=".json" onchange="rs(this)"></div>
+ <div class="card hide" id="u_if"><h3>🗂 Info Data (Admin)</h3><div id="u_info"></div></div>
+ <div class="card hide" id="u_adm" style="border-color:var(--r)"><h3 class="bad">🗑 Kosongkan Data (khusus Admin)</h3>
+  <div class="sub">Tindakan ini <b>tidak bisa dibatalkan</b>. Lakukan <b>Backup JSON</b> dulu. Saldo kas awal (menu Admin) tidak ikut terhapus kecuali Reset total.</div>
+  <label>Ketik <b>HAPUS</b> untuk mengaktifkan</label><input id="kk" placeholder="HAPUS" autocomplete="off">
+  <button class="s" style="background:#7f1d1d;color:#fff;width:100%;margin-top:8px" onclick="purge()">Hapus data lebih dari 90 hari</button>
+  <button class="s" style="background:#7f1d1d;color:#fff;width:100%;margin-top:8px" onclick="clr('tx')">Kosongkan semua transaksi</button>
+  <button class="s" style="background:#7f1d1d;color:#fff;width:100%;margin-top:8px" onclick="clr('ex')">Kosongkan semua pengeluaran</button>
+  <button class="s" style="background:#7f1d1d;color:#fff;width:100%;margin-top:8px" onclick="clr('st')">Kosongkan stok hadiah (jadi 0)</button>
+  <button class="s" style="background:#991b1b;color:#fff;width:100%;margin-top:8px" onclick="clr('txex')">Kosongkan transaksi + pengeluaran</button>
+  <button class="s" style="background:#dc2626;color:#fff;width:100%;margin-top:8px" onclick="clr('all')">⚠️ Reset total (kembali ke pengaturan awal)</button></div>
+ <div class="card"><h3>📋 Panduan SOP &amp; Harga</h3><div id="sop"></div></div>
+ <div class="card sub">RC Papi Otes v2.1 • offline • 2 pengguna (Admin &amp; Kasir)</div>
+</section>
+<section id="p6" class="hide"><div id="adm"></div></section>
+</main>
+<nav><button class="on" onclick="tab(1)">🧾<br>Kasir</button><button onclick="tab(2)">💸<br>Biaya</button><button onclick="tab(3)">📊<br>Laporan</button><button onclick="tab(4)">📦<br>Stok/Kas</button><button onclick="tab(5)">🛠<br>Utility</button><button id="nb6" class="hide" onclick="tab(6)">🔐<br>Admin</button></nav>
+
+<div id="lg" class="ov hide" style="z-index:30;background:#0b1020"><div class="card" style="width:100%;max-width:360px;margin:auto"><h3>🎮 RC Papi Otes – Masuk</h3><label>Pengguna</label><select id="lu"></select><label>PIN</label><input id="lp" type="password" inputmode="numeric" placeholder="Masukkan PIN"><div id="le" class="bad" style="margin-top:6px;font-size:13px"></div><button onclick="login()">Masuk</button></div></div>
+<div id="fm" class="ov hide"><div class="card" style="width:100%;max-width:440px;margin:auto"><h3>✅ Selesai Bermain</h3><div id="ft"></div><div id="fstat" style="margin:6px 0"></div>
+ <div id="fh"><label id="fhl"></label><input id="fhs" type="number" inputmode="numeric" min="0" oninput="fsync()"><div id="fem" class="chk hide"><input type="checkbox" id="femc" onchange="fsync()"><span>Dapat ikan Emas/Hiu (bonus)</span></div><div id="fhint" class="y" style="font-size:12px;margin-top:6px"></div></div>
+ <div class="gift" id="fg"></div><div id="fgc" class="hide"><label>Hadiah yang dipilih anak</label><select id="fgs"></select></div>
+ <div class="big y" id="fdue" style="margin-top:10px;font-size:18px"></div>
+ <div id="fpw"><label>Dibayar dengan</label><select id="fp" onchange="fsync()"><option value="tunai">💵 Tunai</option><option value="qris">📱 QRIS</option><option value="belum">⏳ Belum lunas (catat utang)</option></select>
+  <div id="fc"><label>Uang diterima (opsional)</label><input id="fcash" type="number" inputmode="numeric" oninput="fsync()"><div id="fkb" style="margin-top:6px"></div></div></div>
+ <div class="row"><button style="background:var(--b);color:var(--t)" onclick="fok(0)">Kembali</button><button onclick="fok(1)">Selesai &amp; Simpan</button></div></div></div>
+<div id="md" class="ov hide"><div class="card" style="width:100%;max-width:420px;margin:auto"><h3>Batalkan Sesi?</h3><div id="mt" style="margin-bottom:6px"></div><label>Alasan</label><select id="rs"><option>Alat mati/error</option><option>Baterai habis</option><option>Boat/RC macet atau terbalik</option><option>Pancing/pistol rusak</option><option>Lainnya</option></select><div class="row"><button style="background:var(--b);color:var(--t)" onclick="cxc(0)">Kembali</button><button style="background:#dc2626;color:#fff" onclick="cxc(1)">Ya, Batalkan</button></div></div></div>
+<div id="pn" class="ov hide"><div class="card" style="width:100%;max-width:340px;margin:auto"><h3>🔐 Persetujuan Admin</h3><div class="sub" style="margin-bottom:6px">Masukkan PIN Admin untuk melanjutkan.</div><input id="pi" type="password" inputmode="numeric" placeholder="Masukkan PIN"><div id="pe" class="bad" style="margin-top:6px"></div><div class="row"><button style="background:var(--b);color:var(--t)" onclick="pok(0)">Batal</button><button onclick="pok(1)">Masuk</button></div></div></div>
+
+<script>
+const R=n=>'Rp'+Math.round(n).toLocaleString('id-ID'),$=i=>document.getElementById(i);
+const AB=(f,...a)=>{try{window.AndroidBridge&&AndroidBridge[f]&&AndroidBridge[f](...a)}catch(e){}};
+const IT=['Permen','Snack','Gelang','Gantungan Kunci'];
+const rent=[['15 mnt',15000,15,1],['30 mnt',25000,30,1],['2 unit 20 mnt',40000,20,2]];
+const G={
+EXCA:{n:'RC Excavator',pre:'EXCA',pk:rent,sewa:1,ures:'unit'},
+BOAT:{n:'RC Boat',pre:'BOAT',pk:rent,sewa:1,ures:'unit'},
+MANC:{n:'Mancing Bebek & Ikan',pre:'MANC',pk:[['15 mnt • 1 pancing',10000,15,1],['3 pancing • 25 mnt',25000,25,3],['Paket besar 45 mnt',35000,45,3]],ures:'pancing',u:'Jumlah ikan/bebek didapat (ekor)',em:1,r:[[10,'Gelang Korea Hitam'],[6,'Gantungan Kunci'],[5,'Snack'],[3,'Permen']],hint:'Hitung ekor didapat. Emas/Hiu = bonus. Laporkan pancing patah/rusak ke operator.'},
+TEMB:{n:'Tembak Kaleng Pistol',pre:'TEMB',pk:[['3 peluru',10000,10,3,6],['5 peluru',15000,10,5,6]],ures:'peluru',ret:1,u:'Kaleng jatuh (sesi ini)',r:[[4,'Gelang / Gantungan Kunci'],[3,'Snack'],[2,'Permen']],hint:'Jarak 2 meter.'},
+DART:{n:'Papan Dart 36cm',pre:'DART',pk:[['3 dart',10000,10,3,600],['5 dart',15000,15,5,1000],['8 dart (2 ronde)',25000,20,6,1600]],ures:'dart',ret:1,u:'Skor total',r:[[500,'Gantungan Kunci / Gelang'],[300,'Gelang'],[200,'Snack'],[100,'Permen']],hint:'Jarak 1,5 meter. Skor total semua lemparan.'},
+DUCK:{n:'Hungry Duck Tembak Bebek',pre:'DUCK',pk:[['10 bola',10000,10,10,10],['15 bola',15000,15,15,15],['20 bola',25000,20,20,20]],ures:'bola',ret:1,u:'Bola masuk mulut bebek',r:[[7,'Gelang / Gantungan Kunci'],[5,'Snack'],[3,'Permen']],hint:'Jarak 1 meter. Bola jangan ditelan.'}};
+const DPK={};for(const k in G){DPK[k]=JSON.parse(JSON.stringify(G[k].pk))}
+const CAT=['Sewa tempat','Gaji/upah operator','Beli hadiah','Listrik & air','Baterai/charger/perawatan alat','Perlengkapan','Lain-lain','Setoran ke pemilik'];
+const K='rcpapi_v1';let D={};try{D=JSON.parse(localStorage.getItem(K)||'{}')}catch(e){D={}}
+const sv=()=>localStorage.setItem(K,JSON.stringify(D));
+const ds=d=>new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10),today=()=>ds(new Date());
+const nd=t=>{const d=new Date(t+'T00:00:00');d.setDate(d.getDate()+1);return ds(d)};
+function ini(){D.tx=D.tx||[];D.ex=D.ex||[];D.st=D.st||{};IT.forEach(i=>{D.st[i]=D.st[i]||{q:0}});
+ const op=(D.cfg&&D.cfg.pin)||'1234';D.users=D.users||[{id:'admin',name:'Admin',role:'admin',pin:op},{id:'kasir',name:'Kasir',role:'kasir',pin:'0000'}];D.cfg=Object.assign({tg:150000,sewa:10000,gaji:50000,open:0},D.cfg||{});D.air=D.air||today();D.kal=D.kal||6;D.pk=D.pk||{};
+ D.cap=Object.assign({EXCA:1,BOAT:1,MANC:3,TEMB:5,DART:6,DUCK:20},D.cap||{});
+ D.tx.forEach(x=>{if(x.paid===undefined){x.paid=1;x.pay='tunai'}if(x.paid&&!x.pay)x.pay='tunai';});
+ for(const k in G){G[k].pk=D.pk[k]||JSON.parse(JSON.stringify(DPK[k]))}}
+let U=null,admU=0,PCB=null;const isA=()=>(U&&U.role=='admin')||Date.now()<admU,admPin=()=>D.users.find(u=>u.role=='admin').pin,defPin=()=>D.users.some(u=>(u.role=='admin'&&u.pin==='1234')||(u.role=='kasir'&&u.pin==='0000'));
+function ask(cb){PCB=cb;$('pi').value='';$('pe').textContent='';$('pn').classList.remove('hide');setTimeout(()=>$('pi').focus&&$('pi').focus(),50)}
+function pok(ok){if(!ok){$('pn').classList.add('hide');PCB=null;return}if($('pi').value===String(admPin())){admU=Date.now()+3e5;$('pn').classList.add('hide');const f=PCB;PCB=null;f&&f()}else $('pe').textContent='PIN Admin salah'}
+function rl(){$('rl').textContent=(U?'👤 '+U.name+' ('+(U.role=='admin'?'Admin':'Kasir')+')':'Belum masuk')+' • Offline • 10.00–21.00 WITA';$('nb6').classList.toggle('hide',!(U&&U.role=='admin'));$('lo').classList.toggle('hide',!U)}
+function showLogin(){$('lu').innerHTML=D.users.map(u=>`<option value="${u.id}">${u.name} (${u.role=='admin'?'Admin':'Kasir'})</option>`).join('');$('lp').value='';$('le').textContent=defPin()?'PIN bawaan: Admin 1234 • Kasir 0000 (segera ganti di menu Admin)':'';$('lg').classList.remove('hide')}
+function login(){const u=D.users.find(x=>x.id==$('lu').value);if(u&&$('lp').value===String(u.pin)){U=u;D.sess=u.role=='kasir'?u.id:null;sv();$('lg').classList.add('hide');rl();tab(1)}else $('le').textContent='PIN salah'}
+function logout(){U=null;admU=0;D.sess=null;sv();rl();showLogin()}
+function tab(n){if(n==6&&!(U&&U.role=='admin'))return;
+ for(let i=1;i<=6;i++){$('p'+i).classList.toggle('hide',i!=n);document.querySelectorAll('nav button')[i-1].classList.toggle('on',i==n)}
+ rl();if(n==2)exr();if(n==3)rep();if(n==4){stv();kas()}if(n==5)utr();if(n==6)admr()}
+// ===== hadiah
+const hm=t=>new Date(t).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+function gk(t){const o=[];if(/Permen/.test(t))o.push('Permen');if(/Snack/.test(t))o.push('Snack');if(/Gelang/.test(t))o.push('Gelang');if(/Gantungan/.test(t))o.push('Gantungan Kunci');return o}
+const CH=t=>/Gelang \/ Gantungan|Gantungan Kunci \/ Gelang/.test(t);
+function gift(k,h,em){const g=G[k];if(g.sewa)return'Tanpa Hadiah (Sewa Murni)';if(h===''||h==null)return'—';
+ if(em)return'Gantungan Kunci (Emas/Hiu)'+(h>=10?' + Gelang Korea Hitam':'');for(const[x,t]of g.r)if(h>=x)return t;return'Belum dapat hadiah'}
+function note(k,p){if((k=='EXCA'||k=='BOAT')&&p[3]>1)return'Paket 2 unit: pastikan 2 unit RC siap & baterai full';if(k=='TEMB')return'Cek peluru ready 5 sebelum diberikan';if(k=='DART'&&/8/.test(p[0]))return'Dart hanya 6 biji: lempar 2 ronde (6+2) lalu jumlahkan skor';return''}
+// ===== uang
+const ent=x=>x.paid?[[x.price,x.pay||'tunai','p']]:[];
+const piu=x=>x.paid?0:x.price,live=x=>x.st!='batal';
+function stat(f,t){const T=D.tx.filter(x=>x.d>=f&&x.d<=t&&live(x)),Bt=D.tx.filter(x=>x.d>=f&&x.d<=t&&!live(x)),E=D.ex.filter(e=>e.d>=f&&e.d<=t);
+ let tn=0,qr=0,om=0,dn=0;T.forEach(x=>ent(x).forEach(([a,m,w])=>{if(m=='qris')qr+=a;else tn+=a;if(w=='p')om+=a;else dn+=a}));
+ const kl=E.filter(e=>e.type!='setor').reduce((s,e)=>s+e.amt,0),sp=E.filter(e=>e.type=='setor').reduce((s,e)=>s+e.amt,0);
+ const gm={},hd={},ck={},um={};T.forEach(x=>{const u=um[x.by||'-']=um[x.by||'-']||{c:0,r:0};u.c++;u.r+=ent(x).reduce((s,e)=>s+e[0],0);const g=gm[x.game]=gm[x.game]||{c:0,r:0};g.c++;g.r+=ent(x).reduce((s,e)=>s+e[0],0);if(x.done)(x.items||[]).forEach(i=>hd[i]=(hd[i]||0)+1)});
+ E.forEach(e=>ck[e.cat]=(ck[e.cat]||0)+e.amt);
+ return{T,Bt,E,tn,qr,om,dn,masuk:tn+qr,kl,sp,laba:tn+qr-kl,pu:T.reduce((s,x)=>s+piu(x),0),rf:Bt.filter(x=>x.paid).reduce((s,x)=>s+x.price,0),gm,hd,ck,um}}
+function saldoLt(d){let s=+D.cfg.open||0;D.tx.forEach(x=>{if(x.d<d&&live(x))ent(x).forEach(([a,m])=>{if(m!='qris')s+=a})});D.ex.forEach(e=>{if(e.d<d&&e.m=='tunai')s-=e.amt});return s}
+// ===== kasir
+function fill(){const g=G[$('g').value];$('pk').innerHTML=g.pk.map((p,i)=>`<option value="${i}">${g.pre}-${Math.round(p[1]/1000)} • ${p[0]} • ${R(p[1])}</option>`).join('');sync()}
+function la(){const l=IT.filter(i=>(D.st[i].q||0)<=5);let h=l.length?`<div class="warn">⚠️ Stok hadiah menipis: ${l.map(i=>i+' ('+(D.st[i].q||0)+')').join(', ')}</div>`:'';
+ const dd=Math.floor((Date.now()-new Date(D.air+'T00:00:00'))/864e5);if(dd>=2)h+=`<div class="warn" style="background:#422006;border-color:var(--y);color:var(--y)">💧 Ganti air kolam RC Boat (terakhir ${dd} hari lalu, SOP: tiap 2 hari) <button class="s" onclick="D.air=today();sv();la()">Sudah diganti</button></div>`;$('la').innerHTML=h}
+function inuse(k){return D.tx.filter(x=>x.k==k&&!x.done&&live(x)).reduce((s,x)=>s+(x.un||1),0)}
+function kreset(){D.kal=6;sv();av()}
+function av(){const k=$('g').value,g=G[k],p=g.pk[$('pk').value];if(!p)return;const cap=D.cap[k],use=inuse(k),need=p[3]||1,left=cap-use;
+ const h=`<span class="${need>left?'bad':'ok'}">🔧 ${g.ures||'unit'}: dipakai ${use}/${cap} • tersedia ${Math.max(left,0)}${need>left?' — KURANG untuk paket ini':''}</span>`+(k=='TEMB'?`<br>🥫 Kaleng berdiri: <b>${D.kal}</b>/6 <button class="s" onclick="kreset()">Susun ulang 6</button>`:'');
+ if(av.l!==h){av.l=h;$('av').innerHTML=h}}
+function sync(){const k=$('g').value,g=G[k],p=g.pk[$('pk').value];if(!p)return;$('nt').textContent=note(k,p);$('tt').textContent='Tarif: '+R(p[1])+' • '+p[2]+' menit';
+ const t=$('sp').value=='tunai';$('sc').classList.toggle('hide',!t);const c=$('sca').value;$('skb').innerHTML=t&&c!==''?(+c>=p[1]?`Kembalian: <b class="ok">${R(c-p[1])}</b>`:`<b class="bad">Kurang ${R(p[1]-c)}</b>`):'';la();av()}
+function sched(x){AB('schedule',String(x.id),String(x.end),'⏰ Waktu habis: '+x.game,x.nm+' • '+x.pkt+' — '+(x.paid?'✅ SUDAH BAYAR ('+(x.pay=='qris'?'QRIS':'Tunai')+')':'⚠️ BELUM BAYAR – tagih '+R(x.price))+' • tekan Selesai')}
+function save(){const k=$('g').value,g=G[k],p=g.pk[$('pk').value],now=Date.now(),nm=$('nm').value.trim()||'-',need=p[3]||1,left=D.cap[k]-inuse(k),m=$('sp').value;
+ if(need>left&&!confirm(g.n+': '+(g.ures||'unit')+' tidak cukup (butuh '+need+', tersedia '+Math.max(left,0)+'). Tetap mulai?'))return;
+ if(m=='tunai'&&$('sca').value!==''&&+$('sca').value<p[1]){alert('Uang diterima kurang dari tarif');return}
+ const x={id:now,t:now,end:now+p[2]*6e4,d:today(),k,game:g.n,pkt:g.pre+'-'+Math.round(p[1]/1000),nm,h:null,price:p[1],gift:'',items:[],paid:m=='belum'?0:1,pay:m=='belum'?'':m,done:0,by:U?U.name:'-',un:need,mx:p[4]||null};
+ D.tx.push(x);sched(x);sv();$('nm').value='';$('sca').value='';ss();sync();navigator.vibrate&&navigator.vibrate(80)}
+function ss(){const a=D.tx.filter(x=>!x.done&&live(x));
+ $('ss').innerHTML=a.length?a.map(x=>{const l=x.end-Date.now(),over=l<=0,m=Math.floor(Math.abs(l)/6e4),s=Math.floor(Math.abs(l)%6e4/1e3);
+ const pt=x.paid?`<span class="tag ok">✅ Sudah bayar (${x.pay=='qris'?'QRIS':'Tunai'})</span>`:`<span class="tag bad">⚠️ BELUM BAYAR ${R(x.price)}</span>`;
+ return`<div class="it" style="${over?'background:#3b0a0a;border-radius:8px;padding:8px':''}"><div><b>${x.game}</b><br><span class="tag">${x.nm}</span><span class="tag">${x.pkt}</span><span class="tag">Mulai ${hm(x.t)}</span><br>${pt}${over?'<br><b class="bad">⏰ WAKTU HABIS'+(x.paid?'':' — TAGIH PEMBAYARAN')+'</b>':''}</div>
+ <div style="text-align:right"><div class="big ${over?'bad':'ok'}">${over?'-':''}${m}:${String(s).padStart(2,'0')}</div>${x.paid?'':`<button class="s" style="background:#15803d;color:#fff" onclick="pay(${x.id},'tunai')">Tunai</button> <button class="s" style="background:#1d4ed8;color:#fff" onclick="pay(${x.id},'qris')">QRIS</button><br>`}<button class="s" onclick="fin(${x.id})">Selesai</button> <button class="s" style="background:#7f1d1d" onclick="cxo(${x.id})">Batal</button></div></div>`}).join(''):'<span class="sub">Tidak ada sesi aktif</span>';
+ a.forEach(x=>{if(x.end<=Date.now()&&!x.al){x.al=1;sv();beep()}});av()}
+function beep(){navigator.vibrate&&navigator.vibrate([300,150,300,150,300]);try{const a=new AudioContext(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),700)}catch(e){}}
+setInterval(ss,1000);
+function pay(id,m){const x=D.tx.find(t=>t.id==id);if(!x.paid){x.paid=1;x.pay=m}sv();if(!x.done)sched(x);ss();if(!$('p3').classList.contains('hide'))rep();if(!$('p4').classList.contains('hide'))kas()}
+// batal
+let CX=0;
+function cxo(id){CX=id;const x=D.tx.find(t=>t.id==id),pm=Math.min(Math.floor((Date.now()-x.t)/6e4),Math.round((x.end-x.t)/6e4));
+ $('mt').innerHTML=`<b>${x.game}</b> • ${x.nm}<br>Sudah main ${pm} menit.<br>`+(x.paid?`💰 Sudah bayar (${x.pay=='qris'?'QRIS':'Tunai'}): <b>kembalikan ${R(x.price)}</b> ke anak.`:'Belum bayar: tidak ada uang yang dikembalikan.');$('md').classList.remove('hide')}
+function cxc(ok){$('md').classList.add('hide');if(!ok)return;const x=D.tx.find(t=>t.id==CX);if(!x)return;AB('cancel',String(CX));
+ x.pm=Math.min(Math.floor((Date.now()-x.t)/6e4),Math.round((x.end-x.t)/6e4));x.st='batal';x.why=$('rs').value;x.cx=Date.now();x.done=1;sv();ss();la();navigator.vibrate&&navigator.vibrate(60)}
+// selesai
+let FX=0;
+function fin(id){FX=id;const x=D.tx.find(t=>t.id==id),g=G[x.k];$('ft').innerHTML=`<b>${x.game}</b> • ${x.nm} • ${x.pkt}`;$('fh').classList.toggle('hide',!!g.sewa);
+ if(!g.sewa){$('fhl').textContent=g.u;$('fem').classList.toggle('hide',!g.em)}
+ $('fhs').value='';$('femc').checked=false;$('fp').value=x.paid?'tunai':'tunai';$('fcash').value='';$('fm').classList.remove('hide');fsync()}
+function fcalc(){const x=D.tx.find(t=>t.id==FX),g=G[x.k],h=g.sewa?null:$('fhs').value===''?'':+$('fhs').value;
+ return{x,g,h,gift:gift(x.k,h,$('femc').checked&&!g.sewa)}}
+function fsync(){const c=fcalc(),x=c.x,cur=$('fgs').value,o=gk(c.gift),due=x.paid?0:x.price;
+ $('fstat').innerHTML=x.paid?`✅ <b class="ok">SUDAH BAYAR</b> di depan (${x.pay=='qris'?'QRIS':'Tunai'}) ${R(x.price)}`:`⚠️ <b class="bad">BELUM BAYAR</b> — tarif ${R(x.price)}`;
+ $('fgc').classList.toggle('hide',!CH(c.gift));$('fgs').innerHTML=o.map(v=>`<option>${v}</option>`).join('');if(o.includes(cur))$('fgs').value=cur;
+ $('fg').textContent='🎁 '+c.gift;
+ $('fdue').innerHTML=due>0?`Yang harus dibayar sekarang: ${R(due)}`:'<span class="ok">Tidak ada tagihan tambahan ✅</span>';
+ let h='';if(c.g.ret)h+=`Hitung yang kembali: harus ${x.un||''} ${c.g.ures}. Laporkan bila ada yang hilang/rusak. `;
+ if(x.k=='TEMB')h+=`Kaleng berdiri sekarang: ${D.kal} (hasil maks ${Math.min(6,D.kal)}). `;else if(x.mx)h+=`Hasil maks ${x.mx}. `;
+ if(c.g.hint&&!c.g.sewa)h+=c.g.hint;$('fhint').textContent=h;
+ $('fpw').classList.toggle('hide',due<=0);const t=$('fp').value=='tunai';$('fc').classList.toggle('hide',!t);const cs=$('fcash').value;
+ $('fkb').innerHTML=due>0&&t&&cs!==''?(+cs>=due?`Kembalian: <b class="ok">${R(cs-due)}</b>`:`<b class="bad">Kurang ${R(due-cs)}</b>`):''}
+function fok(ok){$('fm').classList.add('hide');if(!ok)return;const c=fcalc(),x=c.x,re=()=>$('fm').classList.remove('hide');
+ if(!c.g.sewa&&c.h===''){alert('Isi hasil permainan dulu');re();return}
+ const mx=x.k=='TEMB'?Math.min(6,D.kal):(x.mx||null);
+ if(!c.g.sewa&&mx!=null&&c.h>mx){alert('Hasil maksimal '+mx+' untuk sesi ini. Periksa lagi.');re();return}
+  const due=x.paid?0:x.price,m=$('fp').value;
+ if(due>0&&m=='tunai'&&$('fcash').value!==''&&+$('fcash').value<due){alert('Uang diterima kurang dari tagihan');re();return}
+ let it=[],gf=c.gift;if(!/^(Tanpa|Belum|—)/.test(gf)){if(CH(gf)){gf=$('fgs').value;it=[gf]}else it=gk(gf)}
+ const ko=it.filter(i=>(D.st[i].q||0)<=0);if(ko.length&&!confirm('Stok habis: '+ko.join(', ')+'. Tetap simpan?')){re();return}
+ it.forEach(i=>D.st[i].q=(D.st[i].q||0)-1);
+ if(due>0&&!x.paid&&m!='belum'){x.paid=1;x.pay=m}
+ x.h=c.h;x.gift=gf;x.items=it;x.done=1;x.fin=Date.now();x.fby=U?U.name:'-';
+ if(x.k=='TEMB'){D.kal-=c.h;x.sisa=D.kal;if(D.kal<=0){D.kal=6;alert('Semua kaleng sudah jatuh. Susun ulang 6 kaleng.')}}
+ AB('cancel',String(x.id));sv();ss();la();navigator.vibrate&&navigator.vibrate(60)}
+// ===== biaya
+function exr(){if(!$('xd').value)$('xd').value=today();if(!$('xc').innerHTML)$('xc').innerHTML=CAT.map(c=>`<option>${c}</option>`).join('');
+ const d=$('xd').value,l=D.ex.filter(e=>e.d==d),t=l.filter(e=>e.type!='setor').reduce((s,e)=>s+e.amt,0);
+ $('xl').innerHTML=(l.length?l.slice().reverse().map(e=>`<div class="it"><div><b>${e.cat}</b>${e.type=='setor'?' <span class="tag">bukan biaya</span>':''}<br><span class="sub">${e.note||'-'} • ${e.m=='tunai'?'💵 tunai':'🏦 non-tunai'} • ${e.by||'-'}</span></div><div style="text-align:right">${R(e.amt)}<br><button class="s" onclick="xdel(${e.id})">Hapus</button></div></div>`).join('')+`<div class="it"><b>Total biaya</b><b class="bad">${R(t)}</b></div>`:'<span class="sub">Belum ada pengeluaran</span>')}
+function xsave(){const a=+$('xa').value;if(!(a>0)){alert('Isi jumlah pengeluaran');return}const c=$('xc').value;
+ D.ex.push({id:Date.now(),d:$('xd').value||today(),cat:c,note:$('xn').value.trim(),amt:a,m:$('xm').value,type:c=='Setoran ke pemilik'?'setor':'biaya',by:U?U.name:'-'});sv();$('xa').value='';$('xn').value='';exr();navigator.vibrate&&navigator.vibrate(40)}
+function xq(w){const a=w=='sewa'?D.cfg.sewa:D.cfg.gaji,c=w=='sewa'?'Sewa tempat':'Gaji/upah operator';if(!confirm('Catat '+c+' '+R(a)+' (tunai)?'))return;
+ D.ex.push({id:Date.now(),d:$('xd').value||today(),cat:c,note:'Biaya harian',amt:a,m:'tunai',type:'biaya',by:U?U.name:'-'});sv();exr()}
+function xdel(id){if(confirm('Hapus pengeluaran ini?')){D.ex=D.ex.filter(e=>e.id!=id);sv();exr()}}
+// ===== laporan
+let RM='h';
+function setm(m){RM=m;['h','w','m'].forEach(i=>$('m_'+i).classList.toggle('on',i==m));rep()}
+function rng(){const v=$('rd').value||today(),d=new Date(v+'T00:00:00');if(RM=='h')return[v,v];
+ if(RM=='w'){const s=new Date(d);s.setDate(d.getDate()-((d.getDay()+6)%7));const e=new Date(s);e.setDate(s.getDate()+6);return[ds(s),ds(e)]}
+ return[ds(new Date(d.getFullYear(),d.getMonth(),1)),ds(new Date(d.getFullYear(),d.getMonth()+1,0))]}
+const fd=k=>k.slice(8)+'/'+k.slice(5,7);
+function rep(){if(!$('rd').value)$('rd').value=today();const[f,t]=rng(),s=stat(f,t),nm={h:'Harian',w:'Mingguan',m:'Bulanan'}[RM];
+ const sl=saldoLt(nd(t)),ttl=RM=='h'?f:fd(f)+' – '+fd(t)+'/'+t.slice(0,4);
+ $('sm').innerHTML=`<h3>Laporan ${nm}: ${ttl}</h3><div class="grid"><div>Pemasukan<div class="big y">${R(s.masuk)}</div></div><div>Pengeluaran<div class="big bad">${R(s.kl)}</div></div><div>Laba bersih<div class="big ${s.laba>=0?'ok':'bad'}">${R(s.laba)}</div></div><div>Belum lunas<div class="big ${s.pu?'bad':''}">${R(s.pu)}</div></div></div>
+ <div style="margin-top:8px">💵 Tunai ${R(s.tn)} • 📱 QRIS ${R(s.qr)}</div>${s.sp?`<div>📤 Setoran ke pemilik: ${R(s.sp)} (bukan biaya)</div>`:''}${s.Bt.length?`<div>↩️ Batal ${s.Bt.length} sesi${s.rf?' (dikembalikan '+R(s.rf)+')':''}</div>`:''}
+ <div class="gift" style="background:#0c2a4d;border-color:var(--a)">🏦 Saldo kas tunai akhir periode: ${R(sl)}</div>
+ ${RM=='h'?`<div class="gift" style="${s.masuk>=D.cfg.tg?'':'background:#450a0a;border-color:var(--r)'}">${s.masuk>=D.cfg.tg?'✅ Target tercapai':'🔴 Belum capai target '+R(D.cfg.tg)+' (kurang '+R(D.cfg.tg-s.masuk)+')'}</div>`:''}`;
+ if(RM!='h'){const rows=[];for(let d=new Date(f+'T00:00:00');ds(d)<=t;d.setDate(d.getDate()+1)){const k=ds(d),q=stat(k,k);rows.push(`<tr><td>${fd(k)}</td><td>${R(q.masuk)}</td><td>${R(q.kl)}</td><td class="${q.laba>=0?'ok':'bad'}">${R(q.laba)}</td></tr>`)}
+  $('pd').classList.remove('hide');$('pd').innerHTML=`<h3>Rincian per Hari</h3><div style="overflow-x:auto"><table class="tb"><tr><th>Tgl</th><th>Masuk</th><th>Keluar</th><th>Laba</th></tr>${rows.join('')}</table></div>`}else $('pd').classList.add('hide');
+ $('pg').innerHTML=Object.entries(s.gm).map(([k,v])=>`<div class="it"><span>${k} <span class="sub">(${v.c} sesi)</span></span><b>${R(v.r)}</b></div>`).join('')||'<span class="sub">Belum ada</span>';
+ $('pu').innerHTML=Object.entries(s.um).map(([k,v])=>`<div class="it"><span>${k} <span class="sub">(${v.c} sesi)</span></span><b>${R(v.r)}</b></div>`).join('')||'<span class="sub">Belum ada</span>';
+ $('pc').innerHTML=Object.entries(s.ck).map(([k,v])=>`<div class="it"><span>${k}</span><b>${R(v)}</b></div>`).join('')||'<span class="sub">Belum ada</span>';
+ $('hd').innerHTML=Object.entries(s.hd).map(([k,v])=>`<div class="it"><span>${k}</span><b>${v}</b></div>`).join('')||'<span class="sub">Belum ada</span>';
+ $('rhc').classList.toggle('hide',RM!='h');
+ if(RM=='h')$('ls').innerHTML=D.tx.filter(x=>x.d==f).slice().reverse().map(x=>{const b=!live(x),r=!b&&!x.done,u=!b&&piu(x)>0&&(x.done||!x.paid);
+  const tg=b?`<span class="tag bad">❌ BATAL: ${x.why} (main ${x.pm} mnt)</span>`:r?`<span class="tag y">⏱ berjalan</span>`:'';
+  const st=b?'':u?`<span class="tag bad">⏳ BELUM LUNAS ${R(piu(x))}</span>`:`<span class="tag ok">✅ ${x.pay=='qris'?'QRIS':'Tunai'}</span>`;
+  return`<div class="it" style="${b?'opacity:.6':''}"><div><b>${x.game}</b> <span class="tag">${x.pkt}</span>${tg}${st}<br>${hm(x.t)} • ${x.nm} • <span class="sub">${x.by||'-'}</span>${x.h!=null?' • hasil '+x.h:''}<br>${x.done&&!b?'🎁 '+x.gift:''}</div><div style="text-align:right">${b?'<s>'+R(x.price)+'</s>':R(x.price)}<br>${u?`<button class="s" style="background:#15803d;color:#fff" onclick="pay(${x.id},'tunai')">Tunai</button> <button class="s" style="background:#1d4ed8;color:#fff" onclick="pay(${x.id},'qris')">QRIS</button> `:''}<button class="s" onclick="del(${x.id})">🔒 Hapus</button></div></div>`}).join('')||'<span class="sub">Belum ada transaksi</span>'}
+function del(id){if(!isA()){ask(()=>del(id));return}if(!confirm('Hapus transaksi ini? (stok hadiah dikembalikan)'))return;const x=D.tx.find(t=>t.id==id);AB('cancel',String(id));
+ if(x.done&&live(x))(x.items||[]).forEach(i=>D.st[i].q++);D.tx=D.tx.filter(t=>t.id!=id);sv();rep();ss()}
+function dl(n,t,m){if(window.AndroidBridge){AndroidBridge.share(n,t);return}const b=new Blob([t],{type:m}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click()}
+function csv(a,b){const[f,t]=a?[a,b]:rng(),q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';let o='Jenis,Tanggal,Jam,Nama/Keterangan,Game/Kategori,Paket,Hasil,Hadiah,Harga/Jumlah,Metode,Status,Oleh\n';
+ D.tx.filter(x=>x.d>=f&&x.d<=t).forEach(x=>{o+=['Transaksi',x.d,hm(x.t),x.nm,x.game,x.pkt,x.h,x.gift,x.price,x.paid?(x.pay=='qris'?'QRIS':'Tunai'):'-',!live(x)?'Batal':!x.done?'Berjalan':piu(x)>0?'Belum Lunas':'Lunas',x.by].map(q).join(',')+'\n'});
+ D.ex.filter(e=>e.d>=f&&e.d<=t).forEach(e=>{o+=['Pengeluaran',e.d,'',e.note,e.cat,'','','',e.amt,e.m=='tunai'?'Tunai':'Non-tunai',e.type=='setor'?'Setoran':'Biaya',e.by].map(q).join(',')+'\n'});dl('laporan_'+f+'_sd_'+t+'.csv',o,'text/csv')}
+// ===== stok & kas
+function stv(){$('stv').innerHTML=IT.map(i=>`<div class="it"><span>${i}</span><b class="${(D.st[i].q||0)<=5?'bad':'ok'}">${D.st[i].q||0} pcs</b></div>`).join('')}
+function kas(){const d=today(),aw=saldoLt(d),s=stat(d,d),ko=D.ex.filter(e=>e.d==d&&e.m=='tunai').reduce((a,e)=>a+e.amt,0),sisa=aw+s.tn-ko,f=$('uf').value;
+ $('ks').innerHTML=`<table class="tb"><tr><td>Saldo awal (sisa kemarin)</td><td>${R(aw)}</td></tr><tr><td>+ Uang masuk tunai hari ini</td><td class="ok">${R(s.tn)}</td></tr><tr><td>− Uang keluar tunai hari ini</td><td class="bad">${R(ko)}</td></tr><tr><td><b>= Sisa saldo (seharusnya di laci)</b></td><td><b class="y">${R(sisa)}</b></td></tr></table>
+ <div class="sub" style="margin-top:6px">📱 QRIS masuk hari ini ${R(s.qr)} • ⏳ Belum lunas ${R(s.pu)} • 🏦 Biaya non-tunai ${R(D.ex.filter(e=>e.d==d&&e.m!='tunai'&&e.type!='setor').reduce((a,e)=>a+e.amt,0))}</div>`;
+ $('kd').innerHTML=f===''?'':(+f==sisa?'<div class="gift">✅ Kas pas</div>':`<div class="warn">🔴 Selisih ${R(+f-sisa)} — cek transaksi, kembalian, atau pengeluaran yang belum dicatat</div>`)}
+// ===== admin
+function pe(k,i,j,v){D.pk[k]=G[k].pk;G[k].pk[i][j]=v;sv();fill()}
+function pd(k,i){if(G[k].pk.length<=1){alert('Minimal 1 paket');return}if(!confirm('Hapus paket ini?'))return;D.pk[k]=G[k].pk;G[k].pk.splice(i,1);sv();admr();fill()}
+function pa(k){D.pk[k]=G[k].pk;G[k].pk.push(['Paket baru',10000,10,1]);sv();admr();fill()}
+function sset(i,v){D.st[i].q=Math.max(0,+v||0);sv();la()}
+function sadd(i,n){D.st[i].q=(D.st[i].q||0)+n;sv();admr();la()}
+function admr(){const pins=defPin()?'<div class="warn">⚠️ PIN masih bawaan (Admin 1234 / Kasir 0000). Segera ganti di bawah.</div>':'';
+ $('adm').innerHTML=pins+`<div class="card"><h3>💲 Harga &amp; Paket</h3>${Object.keys(G).map(k=>{const g=G[k];return`<details><summary>${g.n}</summary>${g.pk.map((p,i)=>`<div class="card" style="padding:8px"><label>Nama paket</label><input value="${p[0]}" onchange="pe('${k}',${i},0,this.value)"><div class="row"><div><label>Harga (Rp)</label><input type="number" value="${p[1]}" onchange="pe('${k}',${i},1,+this.value)"></div><div><label>Menit</label><input type="number" value="${p[2]}" onchange="pe('${k}',${i},2,+this.value)"></div><div><label>${g.ures}</label><input type="number" value="${p[3]||1}" onchange="pe('${k}',${i},3,+this.value)"></div></div><button class="s" style="background:#7f1d1d" onclick="pd('${k}',${i})">Hapus paket</button></div>`).join('')}<button class="s" onclick="pa('${k}')">+ Tambah paket</button></details>`}).join('')}<div class="sub">Perubahan berlaku untuk sesi baru. Transaksi lama tidak berubah.</div></div>
+ <div class="card"><h3>🎁 Stok Hadiah</h3>${IT.map(i=>`<label>${i} (stok sekarang)</label><div class="row"><input type="number" value="${D.st[i].q||0}" onchange="sset('${i}',this.value)"><button class="s" onclick="sadd('${i}',5)">+5</button><button class="s" onclick="sadd('${i}',10)">+10</button><button class="s" onclick="sadd('${i}',20)">+20</button></div>`).join('')}</div>
+ <div class="card"><h3>⚙️ Pengaturan</h3><label>Target pemasukan harian (Rp)</label><input type="number" value="${D.cfg.tg}" onchange="D.cfg.tg=+this.value;sv()">
+  <label>Biaya sewa tempat harian (Rp) – tombol cepat di menu Biaya</label><input type="number" value="${D.cfg.sewa}" onchange="D.cfg.sewa=+this.value;sv()">
+  <label>Gaji operator harian (Rp)</label><input type="number" value="${D.cfg.gaji}" onchange="D.cfg.gaji=+this.value;sv()">
+  <label>Saldo kas awal (Rp) – modal tunai awal di laci</label><input type="number" value="${D.cfg.open}" onchange="D.cfg.open=+this.value;sv()">
+  <h3 style="margin-top:14px">Jumlah Alat</h3>${Object.keys(G).map(k=>`<label>${G[k].n} (${G[k].ures||'unit'})</label><input type="number" min="0" value="${D.cap[k]}" onchange="D.cap['${k}']=+this.value;sv();av()">`).join('')}</div>
+ <div class="card"><h3>👥 Pengguna (2 akun)</h3>${D.users.map(u=>`<div class="card" style="padding:8px"><b>${u.role=='admin'?'🔐 Admin':'🧾 Kasir'}</b><label>Nama</label><input value="${u.name}" onchange="unm('${u.id}',this.value)"><label>PIN baru (min 4 angka)</label><input id="up_${u.id}" type="password" inputmode="numeric" placeholder="kosongkan jika tidak diganti"><button class="s" onclick="upin('${u.id}')">Simpan PIN</button></div>`).join('')}<div class="sub">Kasir: transaksi, biaya, laporan, stok/kas (lihat), utility. Admin: semua + menu Admin.</div></div>`}
+function unm(id,v){v=v.trim();if(!v)return;D.users.find(u=>u.id==id).name=v;sv();rl()}
+function upin(id){const v=$('up_'+id).value;if(!/^\d{4,}$/.test(v)){alert('PIN minimal 4 angka');return}D.users.find(u=>u.id==id).pin=v;sv();alert('PIN diganti');admr()}
+function bk(){if(!(U&&U.role=='admin'))return;dl('backup_rcpapi_'+today()+'.json',JSON.stringify(D),'application/json')}
+function rs(i){if(!isA()){ask(()=>rs(i));return}const f=i.files[0];if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(j.tx){D=j;ini();sv();U=D.users.find(x=>x.id==(U&&U.id))||null;fill();ss();rl();alert('Data dipulihkan');if(!U)showLogin()}}catch(e){alert('File tidak valid')}})}
+// ===== utility
+function kalc(){const a=+$('k1').value||0,b=+$('k2').value||0;$('k3').innerHTML=$('k2').value===''?'':(b>=a?`Kembalian: <span class="ok">${R(b-a)}</span>`:`<span class="bad">Kurang ${R(a-b)}</span>`)}
+function tesal(){AB('schedule','999',String(Date.now()+10000),'🔔 Tes alarm RC Papi Otes','Alarm & getar berfungsi ✅');alert('Alarm dijadwalkan 10 detik lagi. Kunci layar dan tunggu.');setTimeout(beep,10000)}
+function utr(){const ad=!!(U&&U.role=='admin');['u_adm','u_bk','u_if'].forEach(i=>$(i).classList.toggle('hide',!ad));const dd=Math.floor((Date.now()-new Date(D.air+'T00:00:00'))/864e5);$('u_air').innerHTML=`Air kolam Boat terakhir diganti: <b>${D.air}</b> (${dd} hari lalu). Kaleng berdiri: <b>${D.kal}</b>/6.`;
+ const ds_=D.tx.map(x=>x.d).concat(D.ex.map(e=>e.d)).sort();$('u_info').innerHTML=`Transaksi: <b>${D.tx.length}</b> • Pengeluaran: <b>${D.ex.length}</b><br>Data tertua: ${ds_[0]||'-'} • Ukuran data: ${Math.round(JSON.stringify(D).length/1024)} KB`}
+function purge(){if(!(U&&U.role=='admin'))return;if($('kk').value.trim().toUpperCase()!=='HAPUS'){alert('Ketik HAPUS dulu untuk mengaktifkan');return}const c=new Date();c.setDate(c.getDate()-90);const cut=ds(c);
+ if(!confirm('Hapus semua transaksi & pengeluaran sebelum '+cut+'? Saldo kas tetap dipertahankan. Pastikan sudah Backup.'))return;
+ D.cfg.open=saldoLt(cut);D.tx=D.tx.filter(x=>x.d>=cut||(!x.done&&live(x)));D.ex=D.ex.filter(e=>e.d>=cut);sv();utr();alert('Data lama dihapus')}
+function clr(w){if(!(U&&U.role=='admin'))return;if($('kk').value.trim().toUpperCase()!=='HAPUS'){alert('Ketik HAPUS dulu untuk mengaktifkan');return}
+ const nm={tx:'SEMUA transaksi',ex:'SEMUA pengeluaran',st:'stok hadiah (jadi 0)',txex:'SEMUA transaksi dan pengeluaran',all:'SEMUA DATA (harga, paket, pengguna, stok, transaksi, pengeluaran) dan kembali ke pengaturan awal'}[w];
+ if(!confirm('Kosongkan '+nm+'? Tindakan ini tidak bisa dibatalkan.'))return;
+ if(w=='tx'||w=='txex'||w=='all'){D.tx.forEach(x=>AB('cancel',String(x.id)));if(w!='all'){D.tx=[];D.kal=6}}
+ if(w=='ex'||w=='txex'){D.ex=[]}if(w=='txex'){D.ex=[]}
+ if(w=='st'){IT.forEach(i=>D.st[i].q=0)}
+ $('kk').value='';
+ if(w=='all'){localStorage.removeItem(K);D={};ini();sv();U=null;admU=0;fill();ss();la();rl();showLogin();alert('Reset total selesai. PIN kembali: Admin 1234 • Kasir 0000');return}
+ sv();utr();ss();la();fill();alert('Data dikosongkan')}
+// ===== SOP
+const S={
+'Alur Kasir & Peran':['Kasir: pilih game & paket → pilih pembayaran di depan (Tunai/QRIS/Belum) → Mulai Timer → anak main → Selesai → isi hasil → hadiah muncul otomatis → (jika belum bayar) tagih','Saat waktu habis HP bergetar/berbunyi dan notifikasi menyebut SUDAH BAYAR atau BELUM BAYAR','Operator mencatat semua pengeluaran di menu Biaya (sewa, gaji, beli hadiah, dll.)','Login 2 pengguna: Kasir (operasional harian) dan Admin (ubah harga, paket, stok hadiah, jumlah alat, target, pengguna, hapus transaksi). Setiap transaksi & biaya tercatat atas nama pengguna','Laporan keuangan harian, mingguan, bulanan otomatis dari transaksi & pengeluaran','Kas Tutup: saldo awal + uang masuk tunai − uang keluar tunai = sisa saldo seharusnya di laci','Buka 10.00–21.00 WITA • Target minimal 15 anak/hari = Rp150.000'],
+'RC Excavator':['Harga: 15K/15 mnt • 25K/30 mnt • 40K/2 unit 20 mnt','Sewa murni, TANPA hadiah','Jangan banting remote / injak RC; pasir jangan keluar kotak','Rusak = ganti rugi','Sebelum sewa: cek baterai full & remote'],
+'RC Boat':['Harga: 15K/15 mnt • 25K/30 mnt • 40K/2 unit 20 mnt','Sewa murni, TANPA hadiah','Jangan pegang baling-baling, jangan lempar batu ke kolam','Boat terbalik → operator yang ambil','Ganti air kolam tiap 2 hari (aplikasi mengingatkan)'],
+'Mancing Bebek & Ikan':['Harga: 10K/15 mnt 1 pancing • 25K/3 pancing 25 mnt • 35K/45 mnt','Hadiah: 3 ekor Permen • 5 ekor Snack • 6–9 ekor atau Emas/Hiu Gantungan Kunci • 10+ ekor Gelang Korea Hitam','Pancing jangan ditarik paksa, tangan jangan masuk kolam','Pancing patah: laporkan ke operator'],
+'Tembak Kaleng Pistol':['Harga (FIX SOP): 10K/3 peluru • 15K/5 peluru (ready cuma 5)','Hadiah: 2 jatuh Permen • 3 Snack • 4+ Gelang/Gantungan Kunci','Jarak 2 meter; hitung peluru sebelum & sesudah (harus 5)','Peluru hilang: laporkan ke operator','Kaleng sisa bisa lanjut dengan paket baru (aplikasi mencatat sisa kaleng; jika habis, susun ulang 6)'],
+'Papan Dart 36cm':['Harga: 10K/3 dart • 15K/5 dart • 25K/8 dart','Hadiah skor: 100–199 Permen • 200–299 Snack • 300–499 Gelang • 500+ Gantungan Kunci/Gelang','Jarak 1,5 m; dart velcro magnet aman','Dart hilang: laporkan ke operator; jangan dilempar ke orang','Paket 8 dart = 2 ronde (6+2 dart); skor maksimal 200 per lemparan'],
+'Hungry Duck Tembak Bebek':['Harga: 10K/10 bola • 15K/15 bola • 25K/20 bola','Hadiah: 3 masuk Permen • 5 Snack • 7+ Gelang/Gantungan Kunci','Jarak 1 meter; bola jangan ditelan','Bola hilang: laporkan ke operator'],
+'🛡 Keselamatan Anak':['Anak di bawah 6 th wajib didampingi orang tua/wali','Maksimal 1 anak per unit RC; dilarang berlari di area kolam & pasir','Dilarang makan/minum saat bermain','Sediakan P3K; benda kecil jauhkan dari anak < 3 th','Charger/listrik jauhkan dari air'],
+'💰 Pembayaran & Kebijakan':['Bayar di depan sebelum main (tunai/QRIS); belum bayar harus ditagih saat selesai','Alat mati/rusak saat sesi: tekan Batal; jika sudah bayar, uang dikembalikan penuh','Hadiah 1 jenis per transaksi, tidak bisa ditukar uang'],
+'🔧 Perawatan Alat':['Baterai RC: charge penuh tiap malam, ganti ke cadangan saat < 30%','Boat: keringkan setelah dipakai, cek baling-baling','Excavator: bersihkan pasir dari engsel tiap tutup','Pancing: tes magnet tiap pagi','Pistol & peluru busa: cek retak, hitung 5 ready']};
+$('sop').innerHTML=Object.entries(S).map(([k,v])=>`<details><summary>${k}</summary><ul>${v.map(x=>`<li>${x}</li>`).join('')}</ul></details>`).join('')+`<details><summary>⚠️ Temuan SOP yang perlu diputuskan</summary><ul><li><b>Dart:</b> paket 8 dart tapi alat 6 dart → dipakai 2 ronde (6+2).</li><li><b>Excavator &amp; Boat:</b> paket "2 unit" butuh 2 unit; default 1 unit (ubah di Admin bila sudah ada unit ke-2).</li><li><b>Durasi Tembak Kaleng:</b> tidak disebut SOP; dipakai 10 menit (ubah di Admin).</li><li><b>Hadiah "Gelang / Gantungan Kunci":</b> anak memilih; stok berkurang sesuai pilihan.</li></ul></details>`;
+// ===== mulai
+$('g').innerHTML=Object.keys(G).map(k=>`<option value="${k}">${G[k].n}</option>`).join('');
+ini();fill();ss();la();U=D.sess?(D.users.find(x=>x.id==D.sess)||null):null;rl();if(U)tab(1);else showLogin();
+AB('daily','101','9','30','🔔 Persiapan buka toko','Cek baterai RC, stok hadiah, kembalian, susun kaleng');
+AB('daily','102','20','45','🔔 15 menit lagi tutup','Selesaikan sesi, hitung peluru/dart/bola, cek Kas Tutup');
+</script></body></html>

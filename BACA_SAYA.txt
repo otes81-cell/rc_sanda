@@ -1,0 +1,20 @@
+CARA MEMBUAT APK (sekali saja, butuh internet hanya saat build)
+1. Pasang Android Studio (gratis): developer.android.com/studio
+2. File > Open > pilih folder RCPapiOtes ini. Tunggu Gradle sync selesai.
+3. Menu Build > Build App Bundle(s) / APK(s) > Build APK(s).
+4. Klik "locate": file app-debug.apk. Kirim ke HP, install (izinkan "sumber tidak dikenal").
+Aplikasi berjalan 100% offline. Isi aplikasi ada di app/src/main/assets/index.html
+Ekspor CSV/Backup di aplikasi akan membuka menu Bagikan (WhatsApp, Drive, Email).
+
+ALTERNATIF TANPA ANDROID STUDIO (GitHub, gratis, build di cloud)
+1. Buat akun github.com, lalu New repository (nama bebas, Public/Private).
+2. Upload SEMUA isi folder ini (termasuk folder .github) ke repository.
+3. Buka tab Actions > Build APK > Run workflow. Tunggu +-3-5 menit.
+4. Buka hasil run > bagian Artifacts > unduh RC-Papi-Otes-APK (zip berisi app-debug.apk).
+
+ALARM & NOTIFIKASI
+- Saat transaksi disimpan, alarm dijadwalkan; berbunyi + getar walau layar mati/aplikasi ditutup.
+- Pengingat harian otomatis: 09.30 persiapan buka, 20.45 persiapan tutup.
+- Saat pertama dibuka, izinkan Notifikasi. Android 12+: Setelan > Aplikasi > RC Papi Otes > Alarm & pengingat = Izinkan.
+- Jangan "Paksa berhenti" aplikasi dan matikan penghemat baterai untuk aplikasi ini agar alarm tepat waktu.
+- Alarm timer hilang bila HP restart; buka aplikasi lagi untuk pengingat harian.
