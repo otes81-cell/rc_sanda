@@ -24,10 +24,11 @@ li{margin:3px 0}ul{padding-left:18px;margin:4px 0;color:#cbd5f5}.chk{display:fle
 .ov{position:fixed;inset:0;background:#000b;z-index:20;display:flex;align-items:center;padding:14px;overflow:auto}
 .sub{font-size:12px;color:var(--m)}
 </style></head><body>
-<header><div>🎮 RC PAPI OTES<small id="rl"></small></div><button id="lo" onclick="logout()">Keluar</button></header>
+<header><div>🎮 RC PAPI OTES<small id="rl"></small><small id="sy"></small></div><button id="lo" onclick="logout()">Keluar</button></header>
 <main>
 <section id="p1">
  <div id="la"></div>
+ <div id="tgp"></div>
  <div class="card"><h3>Mulai Sesi Baru</h3>
   <label>Game</label><select id="g" onchange="fill()"></select>
   <label>Paket</label><select id="pk" onchange="sync()"></select>
@@ -84,13 +85,14 @@ li{margin:3px 0}ul{padding-left:18px;margin:4px 0;color:#cbd5f5}.chk{display:fle
   <button class="s" style="background:#991b1b;color:#fff;width:100%;margin-top:8px" onclick="clr('txex')">Kosongkan transaksi + pengeluaran</button>
   <button class="s" style="background:#dc2626;color:#fff;width:100%;margin-top:8px" onclick="clr('all')">⚠️ Reset total (kembali ke pengaturan awal)</button></div>
  <div class="card"><h3>📋 Panduan SOP &amp; Harga</h3><div id="sop"></div></div>
- <div class="card sub">RC Papi Otes v2.1 • offline • 2 pengguna (Admin &amp; Kasir)</div>
+ <div class="card sub">RC Papi Otes v3.0 • online + offline • 3 pengguna (Admin, Kasir 1, Kasir 2)</div>
 </section>
 <section id="p6" class="hide"><div id="adm"></div></section>
 </main>
 <nav><button class="on" onclick="tab(1)">🧾<br>Kasir</button><button onclick="tab(2)">💸<br>Biaya</button><button onclick="tab(3)">📊<br>Laporan</button><button onclick="tab(4)">📦<br>Stok/Kas</button><button onclick="tab(5)">🛠<br>Utility</button><button id="nb6" class="hide" onclick="tab(6)">🔐<br>Admin</button></nav>
 
-<div id="lg" class="ov hide" style="z-index:30;background:#0b1020"><div class="card" style="width:100%;max-width:360px;margin:auto"><h3>🎮 RC Papi Otes – Masuk</h3><label>Pengguna</label><select id="lu"></select><label>PIN</label><input id="lp" type="password" inputmode="numeric" placeholder="Masukkan PIN"><div id="le" class="bad" style="margin-top:6px;font-size:13px"></div><button onclick="login()">Masuk</button></div></div>
+<div id="lg" class="ov hide" style="z-index:30;background:#0b1020"><div class="card" style="width:100%;max-width:360px;margin:auto"><h3>🎮 RC Papi Otes – Masuk</h3><label>Pengguna</label><select id="lu"></select><label>PIN</label><input id="lp" type="password" inputmode="numeric" placeholder="Masukkan PIN"><div id="le" class="bad" style="margin-top:6px;font-size:13px"></div><button onclick="login()">Masuk</button><button class="s" style="background:transparent;color:var(--a);margin-top:8px;width:100%" onclick="symo()">🔄 Hubungkan ke data online (kode setup)</button></div></div>
+<div id="sm2" class="ov hide" style="z-index:40;background:#0b1020"><div class="card" style="width:100%;max-width:380px;margin:auto"><h3>🔄 Hubungkan ke Data Online</h3><label>Tempel kode setup dari Admin</label><textarea id="sc2" style="width:100%;height:110px;background:#0e1430;color:var(--t);border:1px solid var(--b);border-radius:10px;padding:8px;font-size:12px"></textarea><div id="se" class="bad" style="margin-top:6px;font-size:13px"></div><div class="row"><button style="background:var(--b);color:var(--t)" onclick="$('sm2').classList.add('hide')">Batal</button><button onclick="syimp()">Hubungkan</button></div></div></div>
 <div id="fm" class="ov hide"><div class="card" style="width:100%;max-width:440px;margin:auto"><h3>✅ Selesai Bermain</h3><div id="ft"></div><div id="fstat" style="margin:6px 0"></div>
  <div id="fh"><label id="fhl"></label><input id="fhs" type="number" inputmode="numeric" min="0" oninput="fsync()"><div id="fem" class="chk hide"><input type="checkbox" id="femc" onchange="fsync()"><span>Dapat ikan Emas/Hiu (bonus)</span></div><div id="fhint" class="y" style="font-size:12px;margin-top:6px"></div></div>
  <div class="gift" id="fg"></div><div id="fgc" class="hide"><label>Hadiah yang dipilih anak</label><select id="fgs"></select></div>
@@ -116,19 +118,21 @@ DUCK:{n:'Hungry Duck Tembak Bebek',pre:'DUCK',pk:[['10 bola',10000,10,10,10],['1
 const DPK={};for(const k in G){DPK[k]=JSON.parse(JSON.stringify(G[k].pk))}
 const CAT=['Sewa tempat','Gaji/upah operator','Beli hadiah','Listrik & air','Baterai/charger/perawatan alat','Perlengkapan','Lain-lain','Setoran ke pemilik'];
 const K='rcpapi_v1';let D={};try{D=JSON.parse(localStorage.getItem(K)||'{}')}catch(e){D={}}
-const sv=()=>localStorage.setItem(K,JSON.stringify(D));
+const MK=['cfg','cap','pk','users','air','kal','stb'];let SY={tok:'',exp:0,busy:false,t:null,err:'',last:0,did:false,mp:[],pk:false,tt:0};
+const sv=()=>{localStorage.setItem(K,JSON.stringify(D));if(typeof syOn=='function'&&D.sync&&!SY.busy&&mdirty())syncSoon()};
 const ds=d=>new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10),today=()=>ds(new Date());
 const nd=t=>{const d=new Date(t+'T00:00:00');d.setDate(d.getDate()+1);return ds(d)};
-function ini(){D.tx=D.tx||[];D.ex=D.ex||[];D.st=D.st||{};IT.forEach(i=>{D.st[i]=D.st[i]||{q:0}});
- const op=(D.cfg&&D.cfg.pin)||'1234';D.users=D.users||[{id:'admin',name:'Admin',role:'admin',pin:op},{id:'kasir',name:'Kasir',role:'kasir',pin:'0000'}];D.cfg=Object.assign({tg:150000,sewa:10000,gaji:50000,open:0},D.cfg||{});D.air=D.air||today();D.kal=D.kal||6;D.pk=D.pk||{};
+function ini(){D.tx=D.tx||[];D.ex=D.ex||[];D.q=D.q||{};D.snap=D.snap||{};D.mu=D.mu||{};D.dev=D.dev||('d'+Math.random().toString(36).slice(2,8));D.off=D.off||0;
+ D.stb=D.stb||{};IT.forEach(i=>{if(!D.stb[i])D.stb[i]={q:(D.st&&D.st[i]&&D.st[i].q)||0,t:D.st?Date.now():0}});delete D.st;
+ const op=(D.cfg&&D.cfg.pin)||'1234';D.users=D.users||[{id:'admin',name:'Admin',role:'admin',pin:op},{id:'kasir',name:'Kasir 1',role:'kasir',pin:'0000'}];if(!D.users.some(u=>u.id=='kasir2'))D.users.push({id:'kasir2',name:'Kasir 2',role:'kasir',pin:'1111'});D.users.forEach(u=>{if(u.id=='kasir'&&u.name=='Kasir')u.name='Kasir 1'});D.cfg=Object.assign({tg:150000,sewa:10000,gaji:50000,open:0},D.cfg||{});D.air=D.air||today();D.kal=D.kal||6;D.pk=D.pk||{};
  D.cap=Object.assign({EXCA:1,BOAT:1,MANC:3,TEMB:5,DART:6,DUCK:20},D.cap||{});
  D.tx.forEach(x=>{if(x.paid===undefined){x.paid=1;x.pay='tunai'}if(x.paid&&!x.pay)x.pay='tunai';});
  for(const k in G){G[k].pk=D.pk[k]||JSON.parse(JSON.stringify(DPK[k]))}}
-let U=null,admU=0,PCB=null;const isA=()=>(U&&U.role=='admin')||Date.now()<admU,admPin=()=>D.users.find(u=>u.role=='admin').pin,defPin=()=>D.users.some(u=>(u.role=='admin'&&u.pin==='1234')||(u.role=='kasir'&&u.pin==='0000'));
+let U=null,admU=0,PCB=null;const isA=()=>(U&&U.role=='admin')||Date.now()<admU,admPin=()=>D.users.find(u=>u.role=='admin').pin,defPin=()=>D.users.some(u=>(u.role=='admin'&&u.pin==='1234')||(u.id=='kasir'&&u.pin==='0000')||(u.id=='kasir2'&&u.pin==='1111'));
 function ask(cb){PCB=cb;$('pi').value='';$('pe').textContent='';$('pn').classList.remove('hide');setTimeout(()=>$('pi').focus&&$('pi').focus(),50)}
 function pok(ok){if(!ok){$('pn').classList.add('hide');PCB=null;return}if($('pi').value===String(admPin())){admU=Date.now()+3e5;$('pn').classList.add('hide');const f=PCB;PCB=null;f&&f()}else $('pe').textContent='PIN Admin salah'}
-function rl(){$('rl').textContent=(U?'👤 '+U.name+' ('+(U.role=='admin'?'Admin':'Kasir')+')':'Belum masuk')+' • Offline • 10.00–21.00 WITA';$('nb6').classList.toggle('hide',!(U&&U.role=='admin'));$('lo').classList.toggle('hide',!U)}
-function showLogin(){$('lu').innerHTML=D.users.map(u=>`<option value="${u.id}">${u.name} (${u.role=='admin'?'Admin':'Kasir'})</option>`).join('');$('lp').value='';$('le').textContent=defPin()?'PIN bawaan: Admin 1234 • Kasir 0000 (segera ganti di menu Admin)':'';$('lg').classList.remove('hide')}
+function rl(){$('rl').textContent=(U?'👤 '+U.name+' ('+(U.role=='admin'?'Admin':'Kasir')+')':'Belum masuk')+' • 10.00–21.00 WITA';$('nb6').classList.toggle('hide',!(U&&U.role=='admin'));$('lo').classList.toggle('hide',!U)}
+function showLogin(){$('lu').innerHTML=D.users.map(u=>`<option value="${u.id}">${u.name} (${u.role=='admin'?'Admin':'Kasir'})</option>`).join('');$('lp').value='';$('le').textContent=defPin()?'PIN bawaan: Admin 1234 • Kasir 1 0000 • Kasir 2 1111 (segera ganti di menu Admin)':'';$('lg').classList.remove('hide')}
 function login(){const u=D.users.find(x=>x.id==$('lu').value);if(u&&$('lp').value===String(u.pin)){U=u;D.sess=u.role=='kasir'?u.id:null;sv();$('lg').classList.add('hide');rl();tab(1)}else $('le').textContent='PIN salah'}
 function logout(){U=null;admU=0;D.sess=null;sv();rl();showLogin()}
 function tab(n){if(n==6&&!(U&&U.role=='admin'))return;
@@ -153,7 +157,7 @@ function stat(f,t){const T=D.tx.filter(x=>x.d>=f&&x.d<=t&&live(x)),Bt=D.tx.filte
 function saldoLt(d){let s=+D.cfg.open||0;D.tx.forEach(x=>{if(x.d<d&&live(x))ent(x).forEach(([a,m])=>{if(m!='qris')s+=a})});D.ex.forEach(e=>{if(e.d<d&&e.m=='tunai')s-=e.amt});return s}
 // ===== kasir
 function fill(){const g=G[$('g').value];$('pk').innerHTML=g.pk.map((p,i)=>`<option value="${i}">${g.pre}-${Math.round(p[1]/1000)} • ${p[0]} • ${R(p[1])}</option>`).join('');sync()}
-function la(){const l=IT.filter(i=>(D.st[i].q||0)<=5);let h=l.length?`<div class="warn">⚠️ Stok hadiah menipis: ${l.map(i=>i+' ('+(D.st[i].q||0)+')').join(', ')}</div>`:'';
+function la(){const l=IT.filter(i=>stockQ(i)<=5);let h=l.length?`<div class="warn">⚠️ Stok hadiah menipis: ${l.map(i=>i+' ('+stockQ(i)+')').join(', ')}</div>`:'';
  const dd=Math.floor((Date.now()-new Date(D.air+'T00:00:00'))/864e5);if(dd>=2)h+=`<div class="warn" style="background:#422006;border-color:var(--y);color:var(--y)">💧 Ganti air kolam RC Boat (terakhir ${dd} hari lalu, SOP: tiap 2 hari) <button class="s" onclick="D.air=today();sv();la()">Sudah diganti</button></div>`;$('la').innerHTML=h}
 function inuse(k){return D.tx.filter(x=>x.k==k&&!x.done&&live(x)).reduce((s,x)=>s+(x.un||1),0)}
 function kreset(){D.kal=6;sv();av()}
@@ -166,23 +170,23 @@ function sched(x){AB('schedule',String(x.id),String(x.end),'⏰ Waktu habis: '+x
 function save(){const k=$('g').value,g=G[k],p=g.pk[$('pk').value],now=Date.now(),nm=$('nm').value.trim()||'-',need=p[3]||1,left=D.cap[k]-inuse(k),m=$('sp').value;
  if(need>left&&!confirm(g.n+': '+(g.ures||'unit')+' tidak cukup (butuh '+need+', tersedia '+Math.max(left,0)+'). Tetap mulai?'))return;
  if(m=='tunai'&&$('sca').value!==''&&+$('sca').value<p[1]){alert('Uang diterima kurang dari tarif');return}
- const x={id:now,t:now,end:now+p[2]*6e4,d:today(),k,game:g.n,pkt:g.pre+'-'+Math.round(p[1]/1000),nm,h:null,price:p[1],gift:'',items:[],paid:m=='belum'?0:1,pay:m=='belum'?'':m,done:0,by:U?U.name:'-',un:need,mx:p[4]||null};
- D.tx.push(x);sched(x);sv();$('nm').value='';$('sca').value='';ss();sync();navigator.vibrate&&navigator.vibrate(80)}
+ const x={id:uid(),t:now,end:now+p[2]*6e4,d:today(),k,game:g.n,pkt:g.pre+'-'+Math.round(p[1]/1000),nm,h:null,price:p[1],gift:'',items:[],paid:m=='belum'?0:1,pay:m=='belum'?'':m,done:0,dev:D.dev,by:U?U.name:'-',un:need,mx:p[4]||null};
+ D.tx.push(x);ch('tx',x);sched(x);sv();tgcheck();$('nm').value='';$('sca').value='';ss();sync();navigator.vibrate&&navigator.vibrate(80)}
 function ss(){const a=D.tx.filter(x=>!x.done&&live(x));
  $('ss').innerHTML=a.length?a.map(x=>{const l=x.end-Date.now(),over=l<=0,m=Math.floor(Math.abs(l)/6e4),s=Math.floor(Math.abs(l)%6e4/1e3);
  const pt=x.paid?`<span class="tag ok">✅ Sudah bayar (${x.pay=='qris'?'QRIS':'Tunai'})</span>`:`<span class="tag bad">⚠️ BELUM BAYAR ${R(x.price)}</span>`;
  return`<div class="it" style="${over?'background:#3b0a0a;border-radius:8px;padding:8px':''}"><div><b>${x.game}</b><br><span class="tag">${x.nm}</span><span class="tag">${x.pkt}</span><span class="tag">Mulai ${hm(x.t)}</span><br>${pt}${over?'<br><b class="bad">⏰ WAKTU HABIS'+(x.paid?'':' — TAGIH PEMBAYARAN')+'</b>':''}</div>
  <div style="text-align:right"><div class="big ${over?'bad':'ok'}">${over?'-':''}${m}:${String(s).padStart(2,'0')}</div>${x.paid?'':`<button class="s" style="background:#15803d;color:#fff" onclick="pay(${x.id},'tunai')">Tunai</button> <button class="s" style="background:#1d4ed8;color:#fff" onclick="pay(${x.id},'qris')">QRIS</button><br>`}<button class="s" onclick="fin(${x.id})">Selesai</button> <button class="s" style="background:#7f1d1d" onclick="cxo(${x.id})">Batal</button></div></div>`}).join(''):'<span class="sub">Tidak ada sesi aktif</span>';
- a.forEach(x=>{if(x.end<=Date.now()&&!x.al){x.al=1;sv();beep()}});av()}
+ a.forEach(x=>{if(x.end<=Date.now()&&!x.al&&(!x.dev||x.dev==D.dev)){x.al=1;sv();beep()}});av();if(!ss.t||Date.now()-ss.t>30000){ss.t=Date.now();tgcheck()}}
 function beep(){navigator.vibrate&&navigator.vibrate([300,150,300,150,300]);try{const a=new AudioContext(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),700)}catch(e){}}
 setInterval(ss,1000);
-function pay(id,m){const x=D.tx.find(t=>t.id==id);if(!x.paid){x.paid=1;x.pay=m}sv();if(!x.done)sched(x);ss();if(!$('p3').classList.contains('hide'))rep();if(!$('p4').classList.contains('hide'))kas()}
+function pay(id,m){const x=D.tx.find(t=>t.id==id);if(!x.paid){x.paid=1;x.pay=m}ch('tx',x);sv();tgcheck();if(!x.done)sched(x);ss();if(!$('p3').classList.contains('hide'))rep();if(!$('p4').classList.contains('hide'))kas()}
 // batal
 let CX=0;
 function cxo(id){CX=id;const x=D.tx.find(t=>t.id==id),pm=Math.min(Math.floor((Date.now()-x.t)/6e4),Math.round((x.end-x.t)/6e4));
  $('mt').innerHTML=`<b>${x.game}</b> • ${x.nm}<br>Sudah main ${pm} menit.<br>`+(x.paid?`💰 Sudah bayar (${x.pay=='qris'?'QRIS':'Tunai'}): <b>kembalikan ${R(x.price)}</b> ke anak.`:'Belum bayar: tidak ada uang yang dikembalikan.');$('md').classList.remove('hide')}
 function cxc(ok){$('md').classList.add('hide');if(!ok)return;const x=D.tx.find(t=>t.id==CX);if(!x)return;AB('cancel',String(CX));
- x.pm=Math.min(Math.floor((Date.now()-x.t)/6e4),Math.round((x.end-x.t)/6e4));x.st='batal';x.why=$('rs').value;x.cx=Date.now();x.done=1;sv();ss();la();navigator.vibrate&&navigator.vibrate(60)}
+ x.pm=Math.min(Math.floor((Date.now()-x.t)/6e4),Math.round((x.end-x.t)/6e4));x.st='batal';x.why=$('rs').value;x.cx=Date.now();x.done=1;ch('tx',x);sv();tgcheck();ss();la();navigator.vibrate&&navigator.vibrate(60)}
 // selesai
 let FX=0;
 function fin(id){FX=id;const x=D.tx.find(t=>t.id==id),g=G[x.k];$('ft').innerHTML=`<b>${x.game}</b> • ${x.nm} • ${x.pkt}`;$('fh').classList.toggle('hide',!!g.sewa);
@@ -207,21 +211,24 @@ function fok(ok){$('fm').classList.add('hide');if(!ok)return;const c=fcalc(),x=c
   const due=x.paid?0:x.price,m=$('fp').value;
  if(due>0&&m=='tunai'&&$('fcash').value!==''&&+$('fcash').value<due){alert('Uang diterima kurang dari tagihan');re();return}
  let it=[],gf=c.gift;if(!/^(Tanpa|Belum|—)/.test(gf)){if(CH(gf)){gf=$('fgs').value;it=[gf]}else it=gk(gf)}
- const ko=it.filter(i=>(D.st[i].q||0)<=0);if(ko.length&&!confirm('Stok habis: '+ko.join(', ')+'. Tetap simpan?')){re();return}
- it.forEach(i=>D.st[i].q=(D.st[i].q||0)-1);
+ const ko=it.filter(i=>stockQ(i)<=0);if(ko.length&&!confirm('Stok habis: '+ko.join(', ')+'. Tetap simpan?')){re();return}
  if(due>0&&!x.paid&&m!='belum'){x.paid=1;x.pay=m}
- x.h=c.h;x.gift=gf;x.items=it;x.done=1;x.fin=Date.now();x.fby=U?U.name:'-';
+ x.h=c.h;x.gift=gf;x.items=it;x.done=1;x.fin=nowS();x.fby=U?U.name:'-';ch('tx',x);
  if(x.k=='TEMB'){D.kal-=c.h;x.sisa=D.kal;if(D.kal<=0){D.kal=6;alert('Semua kaleng sudah jatuh. Susun ulang 6 kaleng.')}}
- AB('cancel',String(x.id));sv();ss();la();navigator.vibrate&&navigator.vibrate(60)}
+ AB('cancel',String(x.id));sv();tgcheck();ss();la();navigator.vibrate&&navigator.vibrate(60)}
+// ===== target harian
+function tgcheck(){const d=today(),tg=+D.cfg.tg||0,s=stat(d,d),hit=tg>0&&s.masuk>=tg,pct=tg>0?Math.min(100,Math.round(s.masuk/tg*100)):0,key=d+':'+tg;
+ if(hit&&D.tgd!==key){D.tgd=key;sv();AB('schedule','888',String(Date.now()+1500),'🎯 Target harian tercapai!','Pemasukan '+R(s.masuk)+' dari target '+R(tg)+'. Kerja bagus!');beep()}
+ $('tgp').innerHTML=tg>0?`<div class="card" style="padding:10px;${hit?'border-color:var(--g)':''}"><div style="display:flex;justify-content:space-between;font-size:13px"><span>🎯 Target hari ini</span><b class="${hit?'ok':'y'}">${R(s.masuk)} / ${R(tg)} (${pct}%)</b></div><div style="height:8px;background:var(--b);border-radius:6px;margin-top:6px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${hit?'var(--g)':'var(--a)'}"></div></div>${hit?'<div class="ok" style="margin-top:6px;font-weight:700">✅ Target harian tercapai! 🎉</div>':'<div class="sub" style="margin-top:4px">Kurang '+R(tg-s.masuk)+' lagi</div>'}</div>`:''}
 // ===== biaya
 function exr(){if(!$('xd').value)$('xd').value=today();if(!$('xc').innerHTML)$('xc').innerHTML=CAT.map(c=>`<option>${c}</option>`).join('');
  const d=$('xd').value,l=D.ex.filter(e=>e.d==d),t=l.filter(e=>e.type!='setor').reduce((s,e)=>s+e.amt,0);
  $('xl').innerHTML=(l.length?l.slice().reverse().map(e=>`<div class="it"><div><b>${e.cat}</b>${e.type=='setor'?' <span class="tag">bukan biaya</span>':''}<br><span class="sub">${e.note||'-'} • ${e.m=='tunai'?'💵 tunai':'🏦 non-tunai'} • ${e.by||'-'}</span></div><div style="text-align:right">${R(e.amt)}<br><button class="s" onclick="xdel(${e.id})">Hapus</button></div></div>`).join('')+`<div class="it"><b>Total biaya</b><b class="bad">${R(t)}</b></div>`:'<span class="sub">Belum ada pengeluaran</span>')}
 function xsave(){const a=+$('xa').value;if(!(a>0)){alert('Isi jumlah pengeluaran');return}const c=$('xc').value;
- D.ex.push({id:Date.now(),d:$('xd').value||today(),cat:c,note:$('xn').value.trim(),amt:a,m:$('xm').value,type:c=='Setoran ke pemilik'?'setor':'biaya',by:U?U.name:'-'});sv();$('xa').value='';$('xn').value='';exr();navigator.vibrate&&navigator.vibrate(40)}
+ exadd({id:uid(),d:$('xd').value||today(),cat:c,note:$('xn').value.trim(),amt:a,m:$('xm').value,type:c=='Setoran ke pemilik'?'setor':'biaya',by:U?U.name:'-'});sv();$('xa').value='';$('xn').value='';exr();navigator.vibrate&&navigator.vibrate(40)}
 function xq(w){const a=w=='sewa'?D.cfg.sewa:D.cfg.gaji,c=w=='sewa'?'Sewa tempat':'Gaji/upah operator';if(!confirm('Catat '+c+' '+R(a)+' (tunai)?'))return;
- D.ex.push({id:Date.now(),d:$('xd').value||today(),cat:c,note:'Biaya harian',amt:a,m:'tunai',type:'biaya',by:U?U.name:'-'});sv();exr()}
-function xdel(id){if(confirm('Hapus pengeluaran ini?')){D.ex=D.ex.filter(e=>e.id!=id);sv();exr()}}
+ exadd({id:uid(),d:$('xd').value||today(),cat:c,note:'Biaya harian',amt:a,m:'tunai',type:'biaya',by:U?U.name:'-'});sv();exr()}
+function xdel(id){if(confirm('Hapus pengeluaran ini?')){rmrec('ex',id);exr()}}
 // ===== laporan
 let RM='h';
 function setm(m){RM=m;['h','w','m'].forEach(i=>$('m_'+i).classList.toggle('on',i==m));rep()}
@@ -247,13 +254,13 @@ function rep(){if(!$('rd').value)$('rd').value=today();const[f,t]=rng(),s=stat(f
   const st=b?'':u?`<span class="tag bad">⏳ BELUM LUNAS ${R(piu(x))}</span>`:`<span class="tag ok">✅ ${x.pay=='qris'?'QRIS':'Tunai'}</span>`;
   return`<div class="it" style="${b?'opacity:.6':''}"><div><b>${x.game}</b> <span class="tag">${x.pkt}</span>${tg}${st}<br>${hm(x.t)} • ${x.nm} • <span class="sub">${x.by||'-'}</span>${x.h!=null?' • hasil '+x.h:''}<br>${x.done&&!b?'🎁 '+x.gift:''}</div><div style="text-align:right">${b?'<s>'+R(x.price)+'</s>':R(x.price)}<br>${u?`<button class="s" style="background:#15803d;color:#fff" onclick="pay(${x.id},'tunai')">Tunai</button> <button class="s" style="background:#1d4ed8;color:#fff" onclick="pay(${x.id},'qris')">QRIS</button> `:''}<button class="s" onclick="del(${x.id})">🔒 Hapus</button></div></div>`}).join('')||'<span class="sub">Belum ada transaksi</span>'}
 function del(id){if(!isA()){ask(()=>del(id));return}if(!confirm('Hapus transaksi ini? (stok hadiah dikembalikan)'))return;const x=D.tx.find(t=>t.id==id);AB('cancel',String(id));
- if(x.done&&live(x))(x.items||[]).forEach(i=>D.st[i].q++);D.tx=D.tx.filter(t=>t.id!=id);sv();rep();ss()}
+ rmrec('tx',id);tgcheck();rep();ss()}
 function dl(n,t,m){if(window.AndroidBridge){AndroidBridge.share(n,t);return}const b=new Blob([t],{type:m}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click()}
 function csv(a,b){const[f,t]=a?[a,b]:rng(),q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';let o='Jenis,Tanggal,Jam,Nama/Keterangan,Game/Kategori,Paket,Hasil,Hadiah,Harga/Jumlah,Metode,Status,Oleh\n';
  D.tx.filter(x=>x.d>=f&&x.d<=t).forEach(x=>{o+=['Transaksi',x.d,hm(x.t),x.nm,x.game,x.pkt,x.h,x.gift,x.price,x.paid?(x.pay=='qris'?'QRIS':'Tunai'):'-',!live(x)?'Batal':!x.done?'Berjalan':piu(x)>0?'Belum Lunas':'Lunas',x.by].map(q).join(',')+'\n'});
  D.ex.filter(e=>e.d>=f&&e.d<=t).forEach(e=>{o+=['Pengeluaran',e.d,'',e.note,e.cat,'','','',e.amt,e.m=='tunai'?'Tunai':'Non-tunai',e.type=='setor'?'Setoran':'Biaya',e.by].map(q).join(',')+'\n'});dl('laporan_'+f+'_sd_'+t+'.csv',o,'text/csv')}
 // ===== stok & kas
-function stv(){$('stv').innerHTML=IT.map(i=>`<div class="it"><span>${i}</span><b class="${(D.st[i].q||0)<=5?'bad':'ok'}">${D.st[i].q||0} pcs</b></div>`).join('')}
+function stv(){$('stv').innerHTML=IT.map(i=>`<div class="it"><span>${i}</span><b class="${stockQ(i)<=5?'bad':'ok'}">${stockQ(i)} pcs</b></div>`).join('')}
 function kas(){const d=today(),aw=saldoLt(d),s=stat(d,d),ko=D.ex.filter(e=>e.d==d&&e.m=='tunai').reduce((a,e)=>a+e.amt,0),sisa=aw+s.tn-ko,f=$('uf').value;
  $('ks').innerHTML=`<table class="tb"><tr><td>Saldo awal (sisa kemarin)</td><td>${R(aw)}</td></tr><tr><td>+ Uang masuk tunai hari ini</td><td class="ok">${R(s.tn)}</td></tr><tr><td>− Uang keluar tunai hari ini</td><td class="bad">${R(ko)}</td></tr><tr><td><b>= Sisa saldo (seharusnya di laci)</b></td><td><b class="y">${R(sisa)}</b></td></tr></table>
  <div class="sub" style="margin-top:6px">📱 QRIS masuk hari ini ${R(s.qr)} • ⏳ Belum lunas ${R(s.pu)} • 🏦 Biaya non-tunai ${R(D.ex.filter(e=>e.d==d&&e.m!='tunai'&&e.type!='setor').reduce((a,e)=>a+e.amt,0))}</div>`;
@@ -262,21 +269,22 @@ function kas(){const d=today(),aw=saldoLt(d),s=stat(d,d),ko=D.ex.filter(e=>e.d==
 function pe(k,i,j,v){D.pk[k]=G[k].pk;G[k].pk[i][j]=v;sv();fill()}
 function pd(k,i){if(G[k].pk.length<=1){alert('Minimal 1 paket');return}if(!confirm('Hapus paket ini?'))return;D.pk[k]=G[k].pk;G[k].pk.splice(i,1);sv();admr();fill()}
 function pa(k){D.pk[k]=G[k].pk;G[k].pk.push(['Paket baru',10000,10,1]);sv();admr();fill()}
-function sset(i,v){D.st[i].q=Math.max(0,+v||0);sv();la()}
-function sadd(i,n){D.st[i].q=(D.st[i].q||0)+n;sv();admr();la()}
-function admr(){const pins=defPin()?'<div class="warn">⚠️ PIN masih bawaan (Admin 1234 / Kasir 0000). Segera ganti di bawah.</div>':'';
+function sset(i,v){setStock(i,+v||0);la()}
+function sadd(i,n){setStock(i,stockQ(i)+n);admr();la()}
+function admr(){const pins=defPin()?'<div class="warn">⚠️ PIN masih bawaan (Admin 1234 / Kasir 1 0000 / Kasir 2 1111). Segera ganti di bawah.</div>':'';
  $('adm').innerHTML=pins+`<div class="card"><h3>💲 Harga &amp; Paket</h3>${Object.keys(G).map(k=>{const g=G[k];return`<details><summary>${g.n}</summary>${g.pk.map((p,i)=>`<div class="card" style="padding:8px"><label>Nama paket</label><input value="${p[0]}" onchange="pe('${k}',${i},0,this.value)"><div class="row"><div><label>Harga (Rp)</label><input type="number" value="${p[1]}" onchange="pe('${k}',${i},1,+this.value)"></div><div><label>Menit</label><input type="number" value="${p[2]}" onchange="pe('${k}',${i},2,+this.value)"></div><div><label>${g.ures}</label><input type="number" value="${p[3]||1}" onchange="pe('${k}',${i},3,+this.value)"></div></div><button class="s" style="background:#7f1d1d" onclick="pd('${k}',${i})">Hapus paket</button></div>`).join('')}<button class="s" onclick="pa('${k}')">+ Tambah paket</button></details>`}).join('')}<div class="sub">Perubahan berlaku untuk sesi baru. Transaksi lama tidak berubah.</div></div>
- <div class="card"><h3>🎁 Stok Hadiah</h3>${IT.map(i=>`<label>${i} (stok sekarang)</label><div class="row"><input type="number" value="${D.st[i].q||0}" onchange="sset('${i}',this.value)"><button class="s" onclick="sadd('${i}',5)">+5</button><button class="s" onclick="sadd('${i}',10)">+10</button><button class="s" onclick="sadd('${i}',20)">+20</button></div>`).join('')}</div>
- <div class="card"><h3>⚙️ Pengaturan</h3><label>Target pemasukan harian (Rp)</label><input type="number" value="${D.cfg.tg}" onchange="D.cfg.tg=+this.value;sv()">
+ <div class="card"><h3>🎁 Stok Hadiah</h3>${IT.map(i=>`<label>${i} (stok sekarang)</label><div class="row"><input type="number" value="${stockQ(i)}" onchange="sset('${i}',this.value)"><button class="s" onclick="sadd('${i}',5)">+5</button><button class="s" onclick="sadd('${i}',10)">+10</button><button class="s" onclick="sadd('${i}',20)">+20</button></div>`).join('')}</div>
+ ${syCard()}
+ <div class="card"><h3>⚙️ Pengaturan</h3><label>Target pemasukan harian (Rp)</label><input type="number" value="${D.cfg.tg}" onchange="D.cfg.tg=+this.value;sv();tgcheck()">
   <label>Biaya sewa tempat harian (Rp) – tombol cepat di menu Biaya</label><input type="number" value="${D.cfg.sewa}" onchange="D.cfg.sewa=+this.value;sv()">
   <label>Gaji operator harian (Rp)</label><input type="number" value="${D.cfg.gaji}" onchange="D.cfg.gaji=+this.value;sv()">
   <label>Saldo kas awal (Rp) – modal tunai awal di laci</label><input type="number" value="${D.cfg.open}" onchange="D.cfg.open=+this.value;sv()">
   <h3 style="margin-top:14px">Jumlah Alat</h3>${Object.keys(G).map(k=>`<label>${G[k].n} (${G[k].ures||'unit'})</label><input type="number" min="0" value="${D.cap[k]}" onchange="D.cap['${k}']=+this.value;sv();av()">`).join('')}</div>
- <div class="card"><h3>👥 Pengguna (2 akun)</h3>${D.users.map(u=>`<div class="card" style="padding:8px"><b>${u.role=='admin'?'🔐 Admin':'🧾 Kasir'}</b><label>Nama</label><input value="${u.name}" onchange="unm('${u.id}',this.value)"><label>PIN baru (min 4 angka)</label><input id="up_${u.id}" type="password" inputmode="numeric" placeholder="kosongkan jika tidak diganti"><button class="s" onclick="upin('${u.id}')">Simpan PIN</button></div>`).join('')}<div class="sub">Kasir: transaksi, biaya, laporan, stok/kas (lihat), utility. Admin: semua + menu Admin.</div></div>`}
+ <div class="card"><h3>👥 Pengguna (3 akun)</h3>${D.users.map(u=>`<div class="card" style="padding:8px"><b>${u.role=='admin'?'🔐 Admin':'🧾 Kasir'}</b><label>Nama</label><input value="${u.name}" onchange="unm('${u.id}',this.value)"><label>PIN baru (min 4 angka)</label><input id="up_${u.id}" type="password" inputmode="numeric" placeholder="kosongkan jika tidak diganti"><button class="s" onclick="upin('${u.id}')">Simpan PIN</button></div>`).join('')}<div class="sub">Kasir: transaksi, biaya, laporan, stok/kas (lihat), utility. Admin: semua + menu Admin.</div></div>`}
 function unm(id,v){v=v.trim();if(!v)return;D.users.find(u=>u.id==id).name=v;sv();rl()}
 function upin(id){const v=$('up_'+id).value;if(!/^\d{4,}$/.test(v)){alert('PIN minimal 4 angka');return}D.users.find(u=>u.id==id).pin=v;sv();alert('PIN diganti');admr()}
-function bk(){if(!(U&&U.role=='admin'))return;dl('backup_rcpapi_'+today()+'.json',JSON.stringify(D),'application/json')}
-function rs(i){if(!isA()){ask(()=>rs(i));return}const f=i.files[0];if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(j.tx){D=j;ini();sv();U=D.users.find(x=>x.id==(U&&U.id))||null;fill();ss();rl();alert('Data dipulihkan');if(!U)showLogin()}}catch(e){alert('File tidak valid')}})}
+function bk(){if(!(U&&U.role=='admin'))return;dl('backup_rcpapi_'+today()+'.json',JSON.stringify(Object.assign({},D,{sync:undefined,q:undefined})),'application/json')}
+function rs(i){if(!isA()){ask(()=>rs(i));return}const f=i.files[0];if(!f)return;f.text().then(t=>{try{const j=JSON.parse(t);if(j.tx){const sy=D.sync,dv=D.dev;D=j;D.sync=sy;D.dev=dv;D.q={};D.mu={};D.snap={cfg:'',cap:'',pk:'',users:'',air:'',kal:'',stb:''};SY.did=false;ini();applyPk();sv();U=D.users.find(x=>x.id==(U&&U.id))||null;fill();ss();rl();alert('Data dipulihkan');if(!U)showLogin()}}catch(e){alert('File tidak valid')}})}
 // ===== utility
 function kalc(){const a=+$('k1').value||0,b=+$('k2').value||0;$('k3').innerHTML=$('k2').value===''?'':(b>=a?`Kembalian: <span class="ok">${R(b-a)}</span>`:`<span class="bad">Kurang ${R(a-b)}</span>`)}
 function tesal(){AB('schedule','999',String(Date.now()+10000),'🔔 Tes alarm RC Papi Otes','Alarm & getar berfungsi ✅');alert('Alarm dijadwalkan 10 detik lagi. Kunci layar dan tunggu.');setTimeout(beep,10000)}
@@ -284,19 +292,19 @@ function utr(){const ad=!!(U&&U.role=='admin');['u_adm','u_bk','u_if'].forEach(i
  const ds_=D.tx.map(x=>x.d).concat(D.ex.map(e=>e.d)).sort();$('u_info').innerHTML=`Transaksi: <b>${D.tx.length}</b> • Pengeluaran: <b>${D.ex.length}</b><br>Data tertua: ${ds_[0]||'-'} • Ukuran data: ${Math.round(JSON.stringify(D).length/1024)} KB`}
 function purge(){if(!(U&&U.role=='admin'))return;if($('kk').value.trim().toUpperCase()!=='HAPUS'){alert('Ketik HAPUS dulu untuk mengaktifkan');return}const c=new Date();c.setDate(c.getDate()-90);const cut=ds(c);
  if(!confirm('Hapus semua transaksi & pengeluaran sebelum '+cut+'? Saldo kas tetap dipertahankan. Pastikan sudah Backup.'))return;
- D.cfg.open=saldoLt(cut);D.tx=D.tx.filter(x=>x.d>=cut||(!x.done&&live(x)));D.ex=D.ex.filter(e=>e.d>=cut);sv();utr();alert('Data lama dihapus')}
+ D.cfg.open=saldoLt(cut);D.tx.filter(x=>!(x.d>=cut||(!x.done&&live(x)))).forEach(x=>rmrec('tx',x.id));D.ex.filter(e=>!(e.d>=cut)).forEach(e=>rmrec('ex',e.id));sv();utr();alert('Data lama dihapus')}
 function clr(w){if(!(U&&U.role=='admin'))return;if($('kk').value.trim().toUpperCase()!=='HAPUS'){alert('Ketik HAPUS dulu untuk mengaktifkan');return}
  const nm={tx:'SEMUA transaksi',ex:'SEMUA pengeluaran',st:'stok hadiah (jadi 0)',txex:'SEMUA transaksi dan pengeluaran',all:'SEMUA DATA (harga, paket, pengguna, stok, transaksi, pengeluaran) dan kembali ke pengaturan awal'}[w];
  if(!confirm('Kosongkan '+nm+'? Tindakan ini tidak bisa dibatalkan.'))return;
- if(w=='tx'||w=='txex'||w=='all'){D.tx.forEach(x=>AB('cancel',String(x.id)));if(w!='all'){D.tx=[];D.kal=6}}
- if(w=='ex'||w=='txex'){D.ex=[]}if(w=='txex'){D.ex=[]}
- if(w=='st'){IT.forEach(i=>D.st[i].q=0)}
+ if(w=='tx'||w=='txex'||w=='all'){D.tx.forEach(x=>AB('cancel',String(x.id)));D.tx.slice().forEach(x=>rmrec('tx',x.id));D.kal=6}
+ if(w=='ex'||w=='txex'||w=='all'){D.ex.slice().forEach(e=>rmrec('ex',e.id))}
+ if(w=='st'){IT.forEach(i=>setStock(i,0))}
  $('kk').value='';
- if(w=='all'){localStorage.removeItem(K);D={};ini();sv();U=null;admU=0;fill();ss();la();rl();showLogin();alert('Reset total selesai. PIN kembali: Admin 1234 • Kasir 0000');return}
+ if(w=='all'){const sy_=D;localStorage.removeItem(K);D={sync:sy_.sync,dev:sy_.dev,q:sy_.q,snap:sy_.snap,mu:sy_.mu,off:sy_.off};ini();sv();U=null;admU=0;fill();ss();la();rl();showLogin();alert('Reset total selesai. PIN kembali: Admin 1234 • Kasir 1 0000 • Kasir 2 1111');return}
  sv();utr();ss();la();fill();alert('Data dikosongkan')}
 // ===== SOP
 const S={
-'Alur Kasir & Peran':['Kasir: pilih game & paket → pilih pembayaran di depan (Tunai/QRIS/Belum) → Mulai Timer → anak main → Selesai → isi hasil → hadiah muncul otomatis → (jika belum bayar) tagih','Saat waktu habis HP bergetar/berbunyi dan notifikasi menyebut SUDAH BAYAR atau BELUM BAYAR','Operator mencatat semua pengeluaran di menu Biaya (sewa, gaji, beli hadiah, dll.)','Login 2 pengguna: Kasir (operasional harian) dan Admin (ubah harga, paket, stok hadiah, jumlah alat, target, pengguna, hapus transaksi). Setiap transaksi & biaya tercatat atas nama pengguna','Laporan keuangan harian, mingguan, bulanan otomatis dari transaksi & pengeluaran','Kas Tutup: saldo awal + uang masuk tunai − uang keluar tunai = sisa saldo seharusnya di laci','Buka 10.00–21.00 WITA • Target minimal 15 anak/hari = Rp150.000'],
+'Alur Kasir & Peran':['Kasir: pilih game & paket → pilih pembayaran di depan (Tunai/QRIS/Belum) → Mulai Timer → anak main → Selesai → isi hasil → hadiah muncul otomatis → (jika belum bayar) tagih','Saat waktu habis HP bergetar/berbunyi dan notifikasi menyebut SUDAH BAYAR atau BELUM BAYAR','Operator mencatat semua pengeluaran di menu Biaya (sewa, gaji, beli hadiah, dll.)','Login 3 pengguna: Kasir 1 &amp; Kasir 2 (operasional harian) dan Admin (ubah harga, paket, stok hadiah, jumlah alat, target, pengguna, hapus transaksi). Setiap transaksi & biaya tercatat atas nama pengguna','Laporan keuangan harian, mingguan, bulanan otomatis dari transaksi & pengeluaran','Kas Tutup: saldo awal + uang masuk tunai − uang keluar tunai = sisa saldo seharusnya di laci','Buka 10.00–21.00 WITA • Target minimal 15 anak/hari = Rp150.000'],
 'RC Excavator':['Harga: 15K/15 mnt • 25K/30 mnt • 40K/2 unit 20 mnt','Sewa murni, TANPA hadiah','Jangan banting remote / injak RC; pasir jangan keluar kotak','Rusak = ganti rugi','Sebelum sewa: cek baterai full & remote'],
 'RC Boat':['Harga: 15K/15 mnt • 25K/30 mnt • 40K/2 unit 20 mnt','Sewa murni, TANPA hadiah','Jangan pegang baling-baling, jangan lempar batu ke kolam','Boat terbalik → operator yang ambil','Ganti air kolam tiap 2 hari (aplikasi mengingatkan)'],
 'Mancing Bebek & Ikan':['Harga: 10K/15 mnt 1 pancing • 25K/3 pancing 25 mnt • 35K/45 mnt','Hadiah: 3 ekor Permen • 5 ekor Snack • 6–9 ekor atau Emas/Hiu Gantungan Kunci • 10+ ekor Gelang Korea Hitam','Pancing jangan ditarik paksa, tangan jangan masuk kolam','Pancing patah: laporkan ke operator'],
@@ -307,9 +315,85 @@ const S={
 '💰 Pembayaran & Kebijakan':['Bayar di depan sebelum main (tunai/QRIS); belum bayar harus ditagih saat selesai','Alat mati/rusak saat sesi: tekan Batal; jika sudah bayar, uang dikembalikan penuh','Hadiah 1 jenis per transaksi, tidak bisa ditukar uang'],
 '🔧 Perawatan Alat':['Baterai RC: charge penuh tiap malam, ganti ke cadangan saat < 30%','Boat: keringkan setelah dipakai, cek baling-baling','Excavator: bersihkan pasir dari engsel tiap tutup','Pancing: tes magnet tiap pagi','Pistol & peluru busa: cek retak, hitung 5 ready']};
 $('sop').innerHTML=Object.entries(S).map(([k,v])=>`<details><summary>${k}</summary><ul>${v.map(x=>`<li>${x}</li>`).join('')}</ul></details>`).join('')+`<details><summary>⚠️ Temuan SOP yang perlu diputuskan</summary><ul><li><b>Dart:</b> paket 8 dart tapi alat 6 dart → dipakai 2 ronde (6+2).</li><li><b>Excavator &amp; Boat:</b> paket "2 unit" butuh 2 unit; default 1 unit (ubah di Admin bila sudah ada unit ke-2).</li><li><b>Durasi Tembak Kaleng:</b> tidak disebut SOP; dipakai 10 menit (ubah di Admin).</li><li><b>Hadiah "Gelang / Gantungan Kunci":</b> anak memilih; stok berkurang sesuai pilihan.</li></ul></details>`;
+// ===== SINKRON ONLINE (Firebase Realtime Database via REST)
+const nowS=()=>Date.now()+(D.off||0);
+let LU=0;const uid=()=>{let v=Date.now()*10+Math.floor(Math.random()*10);if(v<=LU)v=LU+1;LU=v;return v};
+const syOn=()=>!!(D.sync&&D.sync.on&&D.sync.u&&D.sync.k&&D.sync.e);
+const mdirty=()=>MK.some(k=>D.snap[k]!==undefined&&JSON.stringify(D[k])!==D.snap[k]);
+function ch(kind,x){x._u=nowS();if(syOn()){D.q[kind+'/'+x.id]=x._u;syncSoon()}sv()}
+function rmrec(kind,id){D[kind]=D[kind].filter(r=>String(r.id)!==String(id));if(syOn()){D.q[kind+'/'+id]=0;D.q['del'+kind+'/'+id]=nowS();syncSoon()}sv()}
+const exadd=e=>{D.ex.push(e);ch('ex',e)};
+const stockQ=i=>{const b=D.stb[i];return(b.q||0)-D.tx.filter(x=>x.done&&live(x)&&(x.fin||0)>b.t&&(x.items||[]).includes(i)).length};
+function setStock(i,q){D.stb[i]={q:Math.max(0,q),t:nowS()};sv()}
+function applyPk(){for(const k in G)G[k].pk=D.pk[k]||JSON.parse(JSON.stringify(DPK[k]))}
+function syncSoon(){clearTimeout(SY.t);SY.t=setTimeout(()=>syncNow(false),2000)}
+async function syAuth(){if(SY.tok&&Date.now()<SY.exp)return SY.tok;const s=D.sync;
+ const r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+encodeURIComponent(s.k),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:s.e,password:s.p,returnSecureToken:true})});
+ const j=await r.json();if(!r.ok||!j.idToken)throw new Error((j.error&&j.error.message)||'login gagal');SY.tok=j.idToken;SY.exp=Date.now()+(+j.expiresIn||3600)*1000-120000;return SY.tok}
+async function sx(method,path,body,q){const tk=await syAuth(),s=D.sync;
+ const u=s.u.replace(/\/+$/,'')+'/rcpapi/'+encodeURIComponent(s.s||'toko1')+(path?'/'+path:'')+'.json?auth='+encodeURIComponent(tk)+(q?'&'+q:'');
+ const r=await fetch(u,body!==undefined?{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{method});
+ if(r.status==401||r.status==403){SY.tok='';throw new Error(r.status==401?'tidak berwenang (cek aturan database)':'akses ditolak (cek aturan database)')}
+ if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function syTime(){const t0=Date.now(),v=await sx('PUT','ping/'+D.dev,{'.sv':'timestamp'});if(typeof v=='number')D.off=Math.round(v-(t0+Date.now())/2)}
+async function syPull(full){
+ const q=full?'':'orderBy='+encodeURIComponent('"$key"')+'&startAt='+encodeURIComponent('"'+String(Date.now()-14*864e5)+'"');
+ const [tx,ex,dt,de,meta]=await Promise.all([sx('GET','tx',undefined,q),sx('GET','ex',undefined,q),sx('GET','deltx',undefined,q),sx('GET','delex',undefined,q),sx('GET','meta')]);
+ const rem={tx:tx||{},ex:ex||{}},tomb={tx:dt||{},ex:de||{}};let c=0;SY.pk=false;
+ for(const k of['tx','ex']){
+  for(const id in tomb[k]){if(D[k].some(r=>String(r.id)===id)){D[k]=D[k].filter(r=>String(r.id)!==id);c=1}}
+  const idx=new Map(D[k].map(r=>[String(r.id),r]));
+  for(const id in rem[k]){if(tomb[k][id])continue;const r=rem[k][id];if(!r||typeof r!='object')continue;const l=idx.get(id);
+   if(!l){D[k].push(r);c=1}
+   else if((r._u||0)>(l._u||0)){const al=l.al;if(k=='tx'&&!l.done&&r.done)AB('cancel',id);Object.keys(l).forEach(z=>delete l[z]);Object.assign(l,r);if(al)l.al=al;c=1}}
+  if(full)D[k].forEach(l=>{const id=String(l.id);if(!(id in rem[k])&&!tomb[k][id]){l._u=l._u||nowS();D.q[k+'/'+id]=l._u}})}
+ const rm=meta||{};SY.mp=[];
+ for(const k of MK){const r=rm[k],lj=JSON.stringify(D[k]),dirty=D.snap[k]!==undefined&&lj!==D.snap[k];
+  if(r&&(r.u||0)>(D.mu[k]||0)&&!dirty){const rv=r.v===undefined?(Array.isArray(D[k])?[]:{}):r.v;if(JSON.stringify(rv)!==lj){D[k]=rv;c=1;if(k=='pk')SY.pk=true}D.snap[k]=JSON.stringify(D[k]);D.mu[k]=r.u}
+  else if(!r||dirty)SY.mp.push(k);
+  else if(D.snap[k]===undefined)D.snap[k]=lj}
+ if(SY.pk)applyPk();
+ return c}
+function strip(r){const o=Object.assign({},r);delete o.al;return o}
+async function syPush(){const upd={},sent={};
+ for(const k in D.q){const kind=k.split('/')[0],id=k.split('/')[1];
+  if(kind=='tx'||kind=='ex'){const r=D[kind].find(x=>String(x.id)===id);upd[k]=r?strip(r):null}else upd[k]=D.q[k];sent[k]=D.q[k]}
+ const mu={};for(const k of SY.mp){const u=nowS();upd['meta/'+k]={v:D[k],u};mu[k]=[u,JSON.stringify(D[k])]}
+ if(!Object.keys(upd).length)return;
+ await sx('PATCH','',upd);
+ for(const k in sent)if(D.q[k]===sent[k])delete D.q[k];
+ for(const k in mu){D.mu[k]=mu[k][0];D.snap[k]=mu[k][1]}SY.mp=[]}
+async function syncNow(full){if(!syOn()||SY.busy)return;SY.busy=true;
+ try{await syAuth();if(full||!SY.did||Date.now()-(SY.tt||0)>6e5){await syTime();SY.tt=Date.now()}
+  const c=await syPull(full||!SY.did);await syPush();SY.did=true;SY.last=Date.now();SY.err='';
+  if(U){const nu=D.users.find(x=>x.id==U.id);if(!nu){SY.busy=false;sv();logout();return}U=nu}
+  sv();if(c)syRefresh()}
+ catch(e){SY.err=String(e&&e.message||e)}
+ finally{SY.busy=false;syUI()}}
+function syRefresh(){const v=n=>$('p'+n)&&!$('p'+n).classList.contains('hide');
+ if(SY.pk)fill();ss();la();tgcheck();rl();if(v(2))exr();if(v(3))rep();if(v(4)){stv();kas()}}
+function syTxt(){if(!syOn())return'Belum terhubung. Isi data Firebase di bawah, atau tempel kode setup dari Admin.';const n=Object.keys(D.q).length;
+ return SY.err?`🟠 Offline/gagal: ${SY.err} • ${n} perubahan tertunda`:SY.last?`🟢 Tersinkron ${hm(SY.last)}${n?' • '+n+' tertunda':''}`:'⏳ Menghubungkan...'}
+function syUI(){$('sy').textContent=syOn()?syTxt():'';if($('sy2'))$('sy2').textContent=syTxt()}
+function syCard(){const s=D.sync||{},code=s.u?btoa(unescape(encodeURIComponent(JSON.stringify({u:s.u,k:s.k,e:s.e,p:s.p,s:s.s||'toko1'})))):'';
+ return`<div class="card"><h3>🌐 Sinkron Online (Firebase)</h3><div class="sub" id="sy2">${syTxt()}</div>
+ <label>Database URL</label><input id="sy_u" value="${s.u||''}" placeholder="https://xxxx-default-rtdb.asia-southeast1.firebasedatabase.app">
+ <label>Web API Key</label><input id="sy_k" value="${s.k||''}"><label>Email akun toko</label><input id="sy_e" value="${s.e||''}">
+ <label>Password akun toko</label><input id="sy_p" type="password" value="${s.p||''}"><label>ID Toko</label><input id="sy_s" value="${s.s||'toko1'}">
+ <button onclick="syconn()">Simpan &amp; Hubungkan</button><div class="row"><button class="s" onclick="syncNow(true)">Sinkron penuh sekarang</button><button class="s" style="background:#7f1d1d" onclick="sydis()">Putuskan</button></div>
+ ${code?`<label>Kode setup untuk HP lain (salin, lalu tempel di HP Kasir)</label><textarea readonly onclick="this.select()" style="width:100%;height:90px;background:#0e1430;color:var(--t);border:1px solid var(--b);border-radius:10px;padding:8px;font-size:12px">${code}</textarea><div class="sub">Kode berisi password akun toko. Jangan dibagikan sembarangan.</div>`:''}</div>`}
+async function syconn(){const g=i=>$(i).value.trim();if(!g('sy_u')||!g('sy_k')||!g('sy_e')||!$('sy_p').value){alert('Lengkapi Database URL, API Key, Email, dan Password');return}
+ D.sync={on:true,u:g('sy_u').replace(/\/+$/,''),k:g('sy_k'),e:g('sy_e'),p:$('sy_p').value,s:g('sy_s')||'toko1'};SY.tok='';SY.did=false;sv();$('sy2').textContent='⏳ Menghubungkan...';await syncNow(true);
+ if(SY.err)alert('Gagal: '+SY.err);else alert('Terhubung ✅ Data seluruh HP kini disinkronkan.');admr()}
+function sydis(){if(!confirm('Putuskan sinkron online di HP ini? Data lokal tetap ada.'))return;D.sync=null;D.q={};sv();syUI();admr()}
+function symo(){$('sc2').value='';$('se').textContent='';$('sm2').classList.remove('hide')}
+async function syimp(){let j;try{j=JSON.parse(decodeURIComponent(escape(atob($('sc2').value.trim()))))}catch(e){$('se').textContent='Kode tidak valid';return}
+ if(!j.u||!j.k||!j.e){$('se').textContent='Kode tidak lengkap';return}D.sync={on:true,u:j.u,k:j.k,e:j.e,p:j.p,s:j.s||'toko1'};D.q={};SY.tok='';SY.did=false;sv();$('se').textContent='⏳ Menghubungkan...';await syncNow(true);
+ if(SY.err){$('se').textContent='Gagal: '+SY.err;return}$('sm2').classList.add('hide');showLogin();alert('Terhubung ✅ Silakan login.')}
 // ===== mulai
 $('g').innerHTML=Object.keys(G).map(k=>`<option value="${k}">${G[k].n}</option>`).join('');
 ini();fill();ss();la();U=D.sess?(D.users.find(x=>x.id==D.sess)||null):null;rl();if(U)tab(1);else showLogin();
+syUI();if(syOn())syncNow(true);setInterval(()=>syncNow(false),15000);if(document.addEventListener)document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncNow(false)});if(window.addEventListener)window.addEventListener('online',()=>syncNow(false));
 AB('daily','101','9','30','🔔 Persiapan buka toko','Cek baterai RC, stok hadiah, kembalian, susun kaleng');
 AB('daily','102','20','45','🔔 15 menit lagi tutup','Selesaikan sesi, hitung peluru/dart/bola, cek Kas Tutup');
 </script></body></html>
